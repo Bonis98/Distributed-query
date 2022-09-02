@@ -47,12 +47,14 @@ class Node(Ops, NodeMixin):
     eq = set()
 
     def __init__(self, operation, plain_attr: set, re_enc_attr: set,
-                 enc_attr: set, group_attr=None, parent=None, children=None):
+                 enc_attr: set, print_label=None, group_attr=None, parent=None, children=None):
         super().__init__(operation, plain_attr, re_enc_attr, enc_attr, group_attr)
         # Candidates authorized for query execution
         self.candidates = set()
         self.parent = parent
-        self.name = operation + str(self.get_attributes())
+        if print_label is not None:
+            # Used to print the tree
+            self.name = print_label
         if children:
             self.children = children
 
