@@ -52,6 +52,7 @@ class Node(Ops, NodeMixin):
         # Candidates authorized for query execution
         self.candidates = set()
         self.parent = parent
+        self.name = operation + str(self.get_attributes())
         if children:
             self.children = children
 
@@ -85,11 +86,12 @@ class Node(Ops, NodeMixin):
             self.ip = self.ip.union(self.vp.intersection(self.plain_attr))
             self.ie = self.ve.union(self.vE).intersection(self.re_enc_attr.union(self.enc_attr)).union(self.ie)
         elif self.operation == 'selection' and self.num_attr() == 2:
-            self.eq = self.eq.union(self.plain_attr)
-            self.eq = self.eq.union(self.re_enc_attr)
-            self.eq = self.eq.union(self.enc_attr)
+            self.eq = self.eq.union(self.plain_attr).union(self.re_enc_attr).union(self.enc_attr)
+        elif self.operation == 'cartesian':
+            # Union of sets of children, already done by __assign_profile
+            pass
         elif self.operation == 'join':
-            self.eq = self.eq.union(self.plain_attr.union(self.enc_attr).union(self.re_enc_attr))
+            self.eq = self.eq.union(self.plain_attr).union(self.enc_attr).union(self.re_enc_attr)
         elif self.operation == 'group-by':
             self.vp = self.vp.intersection(self.plain_attr)
             self.ve = self.ve.intersection(self.re_enc_attr)
