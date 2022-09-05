@@ -6,6 +6,16 @@ class Ops:
     # Value restriction for operation attribute
     permitted_ops = ['projection', 'selection', 'cartesian', 'join',
                      'group-by', 'encryption', 'decryption', 're-encryption']
+    comp_cost = {
+        'projection': 1,
+        'selection': 3,
+        'cartesian': 5,
+        'join': 5,
+        'group-by': 2,
+        'encryption': 2,
+        'decryption': 2,
+        're-encryption': 3
+    }
 
     def __init__(self, operation, plain_attr: set, re_enc_attr: set, enc_attr: set, group_attr=None):
         if operation not in self.permitted_ops:
@@ -36,6 +46,8 @@ class Ops:
     def num_attr(self):
         return len(self.plain_attr.union(self.re_enc_attr).union(self.enc_attr))
 
+    def get_comp_cost(self):
+        return int(self.comp_cost[self.operation])
 
 # Class representing a node of the query plan
 class Node(Ops, NodeMixin):
