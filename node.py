@@ -17,37 +17,38 @@ class Ops:
         're-encryption': 3
     }
 
-    def __init__(self, operation, plain_attr: set, re_enc_attr: set, enc_attr: set, group_attr=None):
+    def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, group_attr=None):
         if operation not in self.permitted_ops:
             raise ValueError("Ops: operation must be one of %r." % self.permitted_ops)
         if not isinstance(enc_attr, set):
             raise TypeError("Ops: attributes must be a set, not %s" % type(enc_attr))
-        if not isinstance(plain_attr, set):
-            raise TypeError("Ops: plain_attr must be a set, not %s" % type(plain_attr))
-        if not isinstance(re_enc_attr, set):
-            raise TypeError("Ops: re_enc_attr must be a set, not %s" % type(re_enc_attr))
-        if len(plain_attr.intersection(re_enc_attr).intersection(enc_attr)) != 0:
+        if not isinstance(Ap, set):
+            raise TypeError("Ops: Ap must be a set, not %s" % type(Ap))
+        if not isinstance(Ae, set):
+            raise TypeError("Ops: Ae must be a set, not %s" % type(Ae))
+        if len(Ap.intersection(Ae).intersection(enc_attr)) != 0:
             raise ValueError("Ops: plain, re_enc and enc sets must be disjoint")
         if group_attr is not None:
-            if not (plain_attr.union(re_enc_attr).union(enc_attr)).issuperset(group_attr):
+            if not (Ap.union(Ae).union(enc_attr)).issuperset(group_attr):
                 raise ValueError("Ops: group_attr must be a valid attribute")
             else:
                 self.group_attr = group_attr
-        self.plain_attr = plain_attr
-        self.re_enc_attr = re_enc_attr
+        self.Ap = Ap
+        self.Ae = Ae
         self.enc_attr = enc_attr
         self.operation = operation
 
     # Returns all the attributes of an operation
     def get_attributes(self):
-        return self.plain_attr.union(self.re_enc_attr).union(self.enc_attr)
+        return self.Ap.union(self.Ae).union(self.enc_attr)
 
     # Returns the attributes count of an operation
     def num_attr(self):
-        return len(self.plain_attr.union(self.re_enc_attr).union(self.enc_attr))
+        return len(self.Ap.union(self.Ae).union(self.enc_attr))
 
     def get_comp_cost(self):
         return int(self.comp_cost[self.operation])
+
 
 # Class representing a node of the query plan
 class Node(Ops, NodeMixin):
@@ -57,12 +58,14 @@ class Node(Ops, NodeMixin):
     ip = set()
     ie = set()
     eq = set()
+    totAp = set()
+    totAe = set()
+    # Candidates authorized for query execution
+    candidates = set()
 
-    def __init__(self, operation, plain_attr: set, re_enc_attr: set,
+    def __init__(self, operation, Ap: set, Ae: set,
                  enc_attr: set, print_label=None, group_attr=None, parent=None, children=None):
-        super().__init__(operation, plain_attr, re_enc_attr, enc_attr, group_attr)
-        # Candidates authorized for query execution
-        self.candidates = set()
+        super().__init__(operation, Ap, Ae, enc_attr, group_attr)
         self.parent = parent
         if print_label is not None:
             # Used to print the tree
@@ -71,13 +74,13 @@ class Node(Ops, NodeMixin):
             self.children = children
 
     def add_candidate(self, candidate):
-        self.candidates.add(candidate)
+        self.candidates = self.candidates.union(candidate)
 
     # Computes the profile of a node (in according to def 2.2)
     def compute_profile(self):
         # If node is a leaf, all attributes are encrypted in storage
         if self.is_leaf:
-            self.vE = self.plain_attr.union(self.re_enc_attr).union(self.enc_attr)
+            self.vE = self.Ap.union(self.Ae).union(self.enc_attr)
         else:
             # Retrieve children of the node
             n = self.children
@@ -85,30 +88,30 @@ class Node(Ops, NodeMixin):
                 self.__assign_profile(n[0], n[1])
             else:
                 self.__assign_profile(n[0])
-        if len(self.plain_attr) > 0:
-            self.vp = self.vp.union(self.plain_attr)
-            self.ve = self.ve.difference(self.plain_attr)
-            self.vE = self.vE.difference(self.plain_attr)
-        if len(self.re_enc_attr) > 0:
-            self.ve = self.ve.union(self.re_enc_attr)
-            self.vE = self.vE.difference(self.re_enc_attr)
+        if len(self.Ap) > 0:
+            self.vp = self.vp.union(self.Ap)
+            self.ve = self.ve.difference(self.Ap)
+            self.vE = self.vE.difference(self.Ap)
+        if len(self.Ae) > 0:
+            self.ve = self.ve.union(self.Ae)
+            self.vE = self.vE.difference(self.Ae)
         if self.operation == 'projection':
-            self.vp = self.vp.intersection(self.plain_attr)
-            self.ve = self.ve.intersection(self.re_enc_attr)
+            self.vp = self.vp.intersection(self.Ap)
+            self.ve = self.ve.intersection(self.Ae)
             self.vE = self.vE.intersection(self.enc_attr)
         elif self.operation == 'selection' and self.num_attr() == 1:
-            self.ip = self.ip.union(self.vp.intersection(self.plain_attr))
-            self.ie = self.ve.union(self.vE).intersection(self.re_enc_attr.union(self.enc_attr)).union(self.ie)
+            self.ip = self.ip.union(self.vp.intersection(self.Ap))
+            self.ie = self.ve.union(self.vE).intersection(self.Ae.union(self.enc_attr)).union(self.ie)
         elif self.operation == 'selection' and self.num_attr() == 2:
-            self.eq = self.eq.union(self.plain_attr).union(self.re_enc_attr).union(self.enc_attr)
+            self.eq.add(frozenset(self.Ap.union(self.Ae).union(self.enc_attr)))
         elif self.operation == 'cartesian':
             # Union of sets of children, already done by __assign_profile
             pass
         elif self.operation == 'join':
-            self.eq = self.eq.union(self.plain_attr).union(self.enc_attr).union(self.re_enc_attr)
+            self.eq.add(frozenset(self.Ap.union(self.Ae).union(self.enc_attr)))
         elif self.operation == 'group-by':
-            self.vp = self.vp.intersection(self.plain_attr)
-            self.ve = self.ve.intersection(self.re_enc_attr)
+            self.vp = self.vp.intersection(self.Ap)
+            self.ve = self.ve.intersection(self.Ae)
             self.vE = self.vE.intersection(self.enc_attr)
             self.ip = self.vp.intersection(self.group_attr).union(self.ip)
             self.ie = self.ve.union(self.vE).intersection(self.group_attr).union(self.ie)
