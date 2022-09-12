@@ -3,23 +3,13 @@ from anytree import NodeMixin
 
 # Class representing an operation to be inserted in the tree plan
 class Ops:
-    # Value restriction for operation attribute
-    permitted_ops = ['projection', 'selection', 'cartesian', 'join',
-                     'group-by', 'encryption', 'decryption', 're-encryption']
-    comp_cost = {
-        'projection': 1,
-        'selection': 3,
-        'cartesian': 5,
-        'join': 5,
-        'group-by': 2,
-        'encryption': 2,
-        'decryption': 2,
-        're-encryption': 3
-    }
-
     def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, group_attr=None):
-        if operation not in self.permitted_ops:
-            raise ValueError("Ops: operation must be one of %r." % self.permitted_ops)
+        # Value restriction for operation attribute
+        permitted_ops = ['projection', 'selection', 'cartesian', 'join',
+                         'group-by', 'encryption', 'decryption', 're-encryption', 'query']
+
+        if operation not in permitted_ops:
+            raise ValueError("Ops: operation must be one of %r." % permitted_ops)
         if not isinstance(enc_attr, set):
             raise TypeError("Ops: attributes must be a set, not %s" % type(enc_attr))
         if not isinstance(Ap, set):
@@ -46,8 +36,30 @@ class Ops:
     def num_attr(self):
         return len(self.Ap.union(self.Ae).union(self.enc_attr))
 
-    def get_comp_cost(self):
-        return int(self.comp_cost[self.operation])
+    def get_op_cost(self):
+        op_cost = {
+            'projection': 1,
+            'selection': 3,
+            'cartesian': 5,
+            'join': 5,
+            'group-by': 2,
+            'encryption': 2,
+            'decryption': 2,
+            're-encryption': 3
+        }
+
+        return int(op_cost[self.operation])
+
+
+class Relation:
+    def __init__(self, storage_provider, attributes: list, enc_costs: list, dec_costs: list, size: list):
+        self.storage_provider = storage_provider
+        if not (len(attributes) == len(enc_costs) == len(dec_costs) == len(size)):
+            raise ValueError("Relation: attributes, enc_costs dec_costs and size must have the same length")
+        self.attributes = attributes
+        self.enc_costs = enc_costs
+        self.dec_costs = dec_costs
+        self.size = size
 
 
 # Class representing a node of the query plan
@@ -61,12 +73,21 @@ class Node(Ops, NodeMixin):
     totAp = set()
     totAe = set()
     # Candidates authorized for query execution
-    candidates = set()
+    candidates = list()
+    # Base relation
+    relation = set()
+    assignee = None
+    re_encryption = False
+    comp_cost = None
 
-    def __init__(self, operation, Ap: set, Ae: set,
-                 enc_attr: set, print_label=None, group_attr=None, parent=None, children=None):
+    def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, size: int, relation=None, re_encryption=False,
+                 print_label=None, group_attr=None, parent=None, children=None):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr)
         self.parent = parent
+        self.re_encryption = re_encryption
+        self.size = size
+        if relation is not None:
+            self.relation = relation
         if print_label is not None:
             # Used to print the tree
             self.name = print_label
@@ -74,7 +95,7 @@ class Node(Ops, NodeMixin):
             self.children = children
 
     def add_candidate(self, candidate):
-        self.candidates = self.candidates.union(candidate)
+        self.candidates.append(candidate)
 
     # Computes the profile of a node (in according to def 2.2)
     def compute_profile(self):

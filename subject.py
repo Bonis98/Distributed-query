@@ -1,7 +1,8 @@
 # Class describing a subject with its authorizations
 class Subject:
-    def __init__(self, name, plain_attr: set, enc_attr: set, comp_price: int):
+    def __init__(self, name, plain_attr: set, enc_attr: set, comp_price: int, transfer_price: int):
         self.name = name
         self.plain_attr = set(plain_attr)
         self.enc_attr = set(enc_attr)
         self.comp_price = comp_price
+        self.transfer_price = transfer_price
