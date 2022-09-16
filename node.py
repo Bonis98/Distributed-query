@@ -80,12 +80,15 @@ class Node(Ops, NodeMixin):
     re_encryption = False
     comp_cost = None
 
-    def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, size: int, relation=None, re_encryption=False,
+    def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, size=None, relation=None, re_encryption=False,
                  print_label=None, group_attr=None, parent=None, children=None):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr)
         self.parent = parent
         self.re_encryption = re_encryption
-        self.size = size
+        if operation != 're-encryption':
+            if type(size) != int:
+                raise TypeError("Node: size must be an integer, not %s" % type(size))
+            self.size = size
         if relation is not None:
             self.relation = relation
         if print_label is not None:
@@ -101,7 +104,12 @@ class Node(Ops, NodeMixin):
     def compute_profile(self):
         # If node is a leaf, all attributes are encrypted in storage
         if self.is_leaf:
+            self.vp = set()
+            self.ve = set()
             self.vE = self.Ap.union(self.Ae).union(self.enc_attr)
+            self.ip = set()
+            self.ie = set()
+            self.eq = set()
         else:
             # Retrieve children of the node
             n = self.children
@@ -139,12 +147,12 @@ class Node(Ops, NodeMixin):
 
     def __assign_profile(self, n1, n2=None):
         # Retrieves profile from child(ren) node(s)
-        self.vp = n1.vp
-        self.ve = n1.ve
-        self.vE = n1.vE
-        self.ip = n1.ip
-        self.ie = n1.ie
-        self.eq = n1.eq
+        self.vp = n1.vp.copy()
+        self.ve = n1.ve.copy()
+        self.vE = n1.vE.copy()
+        self.ip = n1.ip.copy()
+        self.ie = n1.ie.copy()
+        self.eq = n1.eq.copy()
         if n2 is not None:
             self.vp = self.vp.union(n2.vp)
             self.ve = self.ve.union(n2.ve)
