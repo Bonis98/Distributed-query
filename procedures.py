@@ -19,14 +19,15 @@ def compute_cost(root, subjects: list):
 
 def identify_candidates(root: Node, subjects: list):
     for node in PostOrderIter(root):
-        node.candidates = list()
-        if node.is_leaf:
-            # Initializes profile to all empty but vE to all relation's attributes
+Bug fix        if node.is_leaf:
+            # Initializes profile to all empty except for vE that is set to all relation's attributes
             node.compute_profile()
+            # Candidates are any subject
             node.candidates = subjects.copy()
             # No need to initialize totap and totae (already empty)
         else:
             # Ap and Ae already initialized
+            # Attributes are already encrypted
             node.compute_profile()
             for child in node.children:
                 node.totAp = node.Ap.union(child.totAp)
@@ -49,7 +50,7 @@ def identify_candidates(root: Node, subjects: list):
                 if __is_authorized(subject, node):
                     # Authorized for first child of current node
                     if __is_authorized(subject, node.children[0]):
-                        # If node has two children verify if it is authorized for it
+                        # If node has two children verify if it is authorized for the second
                         if len(node.children) == 2:
                             # Authorized for second child (if present)
                             if __is_authorized(subject, node.children[1]):
@@ -57,7 +58,7 @@ def identify_candidates(root: Node, subjects: list):
                         # If node has one child, then subject is authorized
                         else:
                             node.candidates.append(subject)
-            # If node has no candidates, print error stop the computation
+            # If node has no candidates, print error and stop the computation
             if len(node.candidates) == 0:
                 print("No candidates available for node " + node.name)
                 exit()
@@ -92,7 +93,7 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                         n.assignee = cand
                         att = att.difference(dec)
                 if len(att):
-                    print("Error: at least one attribute cannot be re-encrypted")
+                    print("Error: %s attributes cannot be re-encrypted" % att)
                     exit()
         elif not node.re_encryption:
             for cand in node.candidates:
@@ -143,7 +144,7 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                 re_enc = node.Ae.intersection(node.assignee.plain_attr)
                 for child in node.children:
                     for leaf in child.leaves:
-                        path_attr = leaf.Ae.union(leaf.Ae).union(leaf.enc_attr).intersection(re_enc)
+                        path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
                         if len(path_attr):
                             n = Node(operation="re-encryption", Ap=set(), Ae=path_attr,
                                      enc_attr=set(), re_encryption=True,
@@ -155,7 +156,10 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
 def extend_plan(root: Node):
     for node in PostOrderIter(root):
         if node.is_root:
-            pass
+            decrypt = node.ve.union(node.vE)
+            n = Node(operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=2,
+                     print_label='Decrypt ' + str(decrypt), parent=node.parent, children=node)
+            #n.assignee = node.assignee
         else:
             for child in node.children:
                 dec = node.Ap.intersection(child.vp.union(child.ve)).difference(child.vp)
