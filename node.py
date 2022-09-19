@@ -76,9 +76,9 @@ class Node(Ops, NodeMixin):
     candidates = list()
     # Base relation
     relation = set()
-    assignee = None
+    assignee = str()
     re_encryption = False
-    comp_cost = None
+    comp_cost = dict()
 
     def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, size=None, relation=None, re_encryption=False,
                  print_label=None, group_attr=None, parent=None, children=None):
@@ -96,9 +96,6 @@ class Node(Ops, NodeMixin):
             self.name = print_label
         if children:
             self.children = children
-
-    def add_candidate(self, candidate):
-        self.candidates.append(candidate)
 
     # Computes the profile of a node (in according to def 2.2)
     def compute_profile(self):
