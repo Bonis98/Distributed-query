@@ -19,7 +19,7 @@ def compute_cost(root, subjects: list):
 
 def identify_candidates(root: Node, subjects: list):
     for node in PostOrderIter(root):
-Bug fix        if node.is_leaf:
+        if node.is_leaf:
             # Initializes profile to all empty except for vE that is set to all relation's attributes
             node.compute_profile()
             # Candidates are any subject
