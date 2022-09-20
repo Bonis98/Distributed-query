@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 .idea/
 main.py
-subjects.csv
+CSV_data/subjects.csv
