@@ -1,8 +1,9 @@
-import array
 import math
+
 from anytree import PostOrderIter, PreOrderIter
-from subject import Subject
+
 from node import Node
+from subject import Subject
 
 
 def compute_cost(root, subjects: dict):
@@ -46,13 +47,13 @@ def identify_candidates(root: Node, subjects: dict):
                             cand.appen(candidate)
             for subject in cand:
                 # Authorized for current node
-                if __is_authorized(subjects[subject], node):
+                if __is_authorized(subject=subjects[subject], node=node):
                     # Authorized for first child of current node
-                    if __is_authorized(subjects[subject], node.children[0]):
+                    if __is_authorized(subject=subjects[subject], node=node.children[0]):
                         # If node has two children verify if it is authorized for the second
                         if len(node.children) == 2:
                             # Authorized for second child (if present)
-                            if __is_authorized(subjects[subject], node.children[1]):
+                            if __is_authorized(subject=subjects[subject], node=node.children[1]):
                                 node.candidates.append(subject)
                         # If node has one child, then subject is authorized
                         else:
@@ -63,9 +64,9 @@ def identify_candidates(root: Node, subjects: dict):
                 exit()
 
 
-def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
-                       relations: list, avg_comp_price: float,
-                       avg_transfer_price: float, manual_assignment=None):
+def compute_assignment(
+        root: Node, subjects: list, to_enc_dec: set, relations: list,
+        avg_comp_price: float, avg_transfer_price: float, manual_assignment=None):
     for node in PreOrderIter(root):
         s_min = None
         min_cost = math.inf
@@ -78,12 +79,12 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                 for cand in subjects.keys():
                     # Candidates are already sorted by comp+transfer price
                     dec = att.intersection(set(subjects[cand]['plain']))
-                    if len(dec) and set(node.relation.attributes)\
+                    if len(dec) and set(node.relation.attributes) \
                             .issubset(set(subjects[cand]['plain']).union(set(subjects[cand]['enc']))):
                         # Insert re-encryption node for 'dec' as parent of current node
-                        n = Node(operation="re-encryption", Ap=set(), Ae=dec, enc_attr=set(),
-                                 re_encryption=True, print_label="Re-encrypt " + str(dec),
-                                 parent=node.parent, children={node})
+                        n = Node(
+                            operation="re-encryption", Ap=set(), Ae=dec, enc_attr=set(), re_encryption=True,
+                            print_label="Re-encrypt " + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
                         att = att.difference(dec)
                         if not len(att):
@@ -107,15 +108,15 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                     for rel in relations:  # Need to delegate re-encryption of attribute
                         if attr in rel.attributes:
                             index = rel.attributes.index(attr)
-                            cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) * \
-                                avg_comp_price + int(rel.size[index]) *\
-                                    (avg_transfer_price + int(subjects[cand]['transfer_price']))
-                for attr in to_enc_dec.intersection(subjects[cand]['plain']):   # S can re-encrypt attribute
+                            cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
+                                    * avg_comp_price + int(rel.size[index]) \
+                                    * (avg_transfer_price + int(subjects[cand]['transfer_price']))
+                for attr in to_enc_dec.intersection(subjects[cand]['plain']):  # S can re-encrypt attribute
                     for rel in relations:
                         if attr in rel.attributes:
                             index = rel.attributes.index(attr)
-                            cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) *\
-                                subjects[cand]['comp_price']
+                            cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
+                                    * subjects[cand]['comp_price']
                 if cost < min_cost:
                     min_cost = cost
                     s_min = cand
@@ -125,11 +126,10 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                 node.assignee = manual_assignment.pop(0)
             # Insert re-encryption node for to_enc_dec attributes pushed down
             if len(to_enc_dec.intersection(set(subjects[node.assignee]['plain']))):
-                n = Node(operation="re-encryption", Ap=set(),
-                         Ae=to_enc_dec.intersection(set(subjects[node.assignee]['plain'])), enc_attr=set(),
-                         re_encryption=True,
-                         print_label="Re-encrypt " + str(to_enc_dec.intersection(set(subjects[node.assignee]['plain']))),
-                         parent=node.parent, children={node})
+                Ae = to_enc_dec.intersection(set(subjects[node.assignee]['plain']))
+                n = Node(
+                    operation="re-encryption", Ap=set(), Ae=Ae, enc_attr=set(), re_encryption=True,
+                    print_label="Re-encrypt " + str(Ae), parent=node.parent, children={node})
                 n.assignee = node.assignee
                 to_enc_dec = to_enc_dec.difference(set(subjects[node.assignee]['plain']))
             to_enc_dec = to_enc_dec.union(node.Ae.difference(set(subjects[node.assignee]['plain'])))
@@ -141,10 +141,9 @@ def compute_assignment(root: Node, subjects: list, to_enc_dec: set,
                     for leaf in child.leaves:
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
                         if len(path_attr):
-                            n = Node(operation="re-encryption", Ap=set(), Ae=path_attr,
-                                     enc_attr=set(), re_encryption=True,
-                                     print_label="Re-encrypt " + str(path_attr),
-                                     parent=node, children={child})
+                            n = Node(
+                                operation="re-encryption", Ap=set(), Ae=path_attr, enc_attr=set(), re_encryption=True,
+                                print_label="Re-encrypt " + str(path_attr), parent=node, children={child})
                             n.assignee = node.assignee
 
 
@@ -152,22 +151,25 @@ def extend_plan(root: Node, subjects: dict()):
     for node in PostOrderIter(root):
         if node.is_root:
             decrypt = node.ve.union(node.vE)
-            n = Node(operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=2,
-                     print_label='Decrypt ' + str(decrypt), parent=node.parent, children=node)
+            n = Node(
+                operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=2,
+                print_label='Decrypt ' + str(decrypt), parent=node.parent, children=node)
             n.assignee = 'U'
         else:
             for child in node.children:
                 dec = node.Ap.intersection(child.vp.union(child.ve)).difference(child.vp)
                 if len(dec):
-                    n = Node(operation='decryption', Ap=dec, Ae=set(), enc_attr=set(), size=2,
-                             print_label='Decrypt ' + str(dec), parent=node, children={child})
+                    n = Node(
+                        operation='decryption', Ap=dec, Ae=set(), enc_attr=set(), size=2,
+                        print_label='Decrypt ' + str(dec), parent=node, children={child})
                     n.compute_profile()
                     n.assignee = node.assignee
             node.compute_profile()
             enc = node.vp.intersection(subjects[node.parent.assignee]['enc'])
             if len(enc):
-                n = Node(operation='encryption', Ap=set(), Ae=set(), enc_attr=enc, size=2,
-                         print_label='Encrypt ' + str(enc), parent=node.parent, children=node)
+                n = Node(
+                    operation='encryption', Ap=set(), Ae=set(), enc_attr=enc, size=2,
+                    print_label='Encrypt ' + str(enc), parent=node.parent, children=node)
                 n.compute_profile()
                 n.assignee = node.assignee
 

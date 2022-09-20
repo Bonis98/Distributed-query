@@ -5,8 +5,9 @@ from anytree import NodeMixin
 class Ops:
     def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, group_attr=None):
         # Value restriction for operation attribute
-        permitted_ops = ['projection', 'selection', 'cartesian', 'join',
-                         'group-by', 'encryption', 'decryption', 're-encryption', 'query']
+        permitted_ops = [
+            'projection', 'selection', 'cartesian', 'join',
+            'group-by', 'encryption', 'decryption', 're-encryption', 'query']
 
         if operation not in permitted_ops:
             raise ValueError("Ops: operation must be one of %r." % permitted_ops)
@@ -80,8 +81,9 @@ class Node(Ops, NodeMixin):
     re_encryption = False
     comp_cost = dict()
 
-    def __init__(self, operation, Ap: set, Ae: set, enc_attr: set, size=None, relation=None, re_encryption=False,
-                 print_label=None, group_attr=None, parent=None, children=None):
+    def __init__(
+            self, operation, Ap: set, Ae: set, enc_attr: set, size=None, relation=None, re_encryption=False,
+            print_label=None, group_attr=None, parent=None, children=None):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr)
         self.parent = parent
         self.re_encryption = re_encryption
