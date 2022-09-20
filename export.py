@@ -38,7 +38,9 @@ def node_attr(node: Node):
         label = label.replace('Group-by ', '&gamma;<sub>')
         label = label.replace('Join ', '⋈<sub>')
         label = label.replace('Projection ', '&pi;<sub>')
-        label += '</sub><br/><br/>'
+        if label.find('<sub>') != -1:
+            label += '</sub>'
+        label += '<br/><br/>'
         # If node is not a leaf node, print candidates
         if not node.is_leaf:
             for cand in node.candidates:
@@ -52,6 +54,8 @@ def node_attr(node: Node):
         label += 'Assignee:&nbsp;<B>' + node.assignee + '</B>'
         label += '>'
         label += 'shape=box'
+    if not len(node.candidates):
+        label = label.replace("<br/>", "")
     return label
 
 
