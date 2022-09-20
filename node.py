@@ -8,20 +8,16 @@ class Ops:
         permitted_ops = [
             'projection', 'selection', 'cartesian', 'join',
             'group-by', 'encryption', 'decryption', 're-encryption', 'query']
-
+        Ap = set(Ap)
+        Ae = set(Ae)
+        enc_attr = set(enc_attr)
         if operation not in permitted_ops:
-            raise ValueError("Ops: operation must be one of %r." % permitted_ops)
-        if not isinstance(enc_attr, set):
-            raise TypeError("Ops: attributes must be a set, not %s" % type(enc_attr))
-        if not isinstance(Ap, set):
-            raise TypeError("Ops: Ap must be a set, not %s" % type(Ap))
-        if not isinstance(Ae, set):
-            raise TypeError("Ops: Ae must be a set, not %s" % type(Ae))
-        if len(Ap.intersection(Ae).intersection(enc_attr)) != 0:
-            raise ValueError("Ops: plain, re_enc and enc sets must be disjoint")
+            raise ValueError('Ops: operation must be one of %r.' % permitted_ops)
+        if len(Ap.intersection(Ae).intersection(enc_attr)):
+            raise ValueError('Ops: plain, re_enc and enc sets must be disjoint')
         if group_attr is not None:
             if not (Ap.union(Ae).union(enc_attr)).issuperset(group_attr):
-                raise ValueError("Ops: group_attr must be a valid attribute")
+                raise ValueError('Ops: group_attr must be a valid attribute')
             else:
                 self.group_attr = group_attr
         self.Ap = Ap
@@ -56,11 +52,11 @@ class Relation:
     def __init__(self, storage_provider, attributes: list, enc_costs: list, dec_costs: list, size: list):
         self.storage_provider = storage_provider
         if not (len(attributes) == len(enc_costs) == len(dec_costs) == len(size)):
-            raise ValueError("Relation: attributes, enc_costs dec_costs and size must have the same length")
-        self.attributes = attributes
-        self.enc_costs = enc_costs
-        self.dec_costs = dec_costs
-        self.size = size
+            raise ValueError('Relation: attributes, enc_costs dec_costs and size must have the same length')
+        self.attributes = list(attributes)
+        self.enc_costs = list(enc_costs)
+        self.dec_costs = list(dec_costs)
+        self.size = list(size)
 
 
 # Class representing a node of the query plan
@@ -76,23 +72,21 @@ class Node(Ops, NodeMixin):
     # Candidates authorized for query execution
     candidates = list()
     # Base relation
-    relation = set()
+    relation = None
     assignee = str()
     re_encryption = False
     comp_cost = dict()
 
     def __init__(
-            self, operation, Ap: set, Ae: set, enc_attr: set, size=None, relation=None, re_encryption=False,
+            self, operation, Ap: set, Ae: set, enc_attr: set, size=None, re_encryption=False,
             print_label=None, group_attr=None, parent=None, children=None):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr)
         self.parent = parent
         self.re_encryption = re_encryption
         if operation != 're-encryption':
             if type(size) != int:
-                raise TypeError("Node: size must be an integer, not %s" % type(size))
+                raise TypeError('Node: size must be an integer, not %s' % type(size))
             self.size = size
-        if relation is not None:
-            self.relation = relation
         if print_label is not None:
             # Used to print the tree
             self.name = print_label

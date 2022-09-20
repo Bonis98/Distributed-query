@@ -60,7 +60,7 @@ def identify_candidates(root: Node, subjects: dict):
                             node.candidates.append(subject)
             # If node has no candidates, print error and stop the computation
             if len(node.candidates) == 0:
-                print("No candidates available for node " + node.name)
+                print('No candidates available for node ' + node.name)
                 exit()
 
 
@@ -83,14 +83,14 @@ def compute_assignment(
                             .issubset(set(subjects[cand]['plain']).union(set(subjects[cand]['enc']))):
                         # Insert re-encryption node for 'dec' as parent of current node
                         n = Node(
-                            operation="re-encryption", Ap=set(), Ae=dec, enc_attr=set(), re_encryption=True,
-                            print_label="Re-encrypt " + str(dec), parent=node.parent, children={node})
+                            operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), re_encryption=True,
+                            print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
                         att = att.difference(dec)
                         if not len(att):
                             break
                 if len(att):
-                    print("Error: %s attributes cannot be re-encrypted" % att)
+                    print('Error: %s attributes cannot be re-encrypted' % att)
                     exit()
         elif not node.re_encryption:
             for cand in node.candidates:
@@ -128,8 +128,8 @@ def compute_assignment(
             if len(to_enc_dec.intersection(set(subjects[node.assignee]['plain']))):
                 Ae = to_enc_dec.intersection(set(subjects[node.assignee]['plain']))
                 n = Node(
-                    operation="re-encryption", Ap=set(), Ae=Ae, enc_attr=set(), re_encryption=True,
-                    print_label="Re-encrypt " + str(Ae), parent=node.parent, children={node})
+                    operation='re-encryption', Ap=set(), Ae=Ae, enc_attr=set(), re_encryption=True,
+                    print_label='Re-encrypt ' + str(Ae), parent=node.parent, children={node})
                 n.assignee = node.assignee
                 to_enc_dec = to_enc_dec.difference(set(subjects[node.assignee]['plain']))
             to_enc_dec = to_enc_dec.union(node.Ae.difference(set(subjects[node.assignee]['plain'])))
@@ -142,8 +142,8 @@ def compute_assignment(
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
                         if len(path_attr):
                             n = Node(
-                                operation="re-encryption", Ap=set(), Ae=path_attr, enc_attr=set(), re_encryption=True,
-                                print_label="Re-encrypt " + str(path_attr), parent=node, children={child})
+                                operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), re_encryption=True,
+                                print_label='Re-encrypt ' + str(path_attr), parent=node, children={child})
                             n.assignee = node.assignee
 
 
