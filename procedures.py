@@ -152,7 +152,7 @@ def extend_plan(root: Node, subjects: dict()):
         if node.is_root:
             decrypt = node.ve.union(node.vE)
             n = Node(
-                operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=2,
+                operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=node.size,
                 print_label='Decrypt ' + str(decrypt), parent=node.parent, children=node)
             n.assignee = 'U'
         else:
@@ -160,7 +160,7 @@ def extend_plan(root: Node, subjects: dict()):
                 dec = node.Ap.intersection(child.vp.union(child.ve)).difference(child.vp)
                 if len(dec):
                     n = Node(
-                        operation='decryption', Ap=dec, Ae=set(), enc_attr=set(), size=2,
+                        operation='decryption', Ap=dec, Ae=set(), enc_attr=set(), size=child.size,
                         print_label='Decrypt ' + str(dec), parent=node, children={child})
                     n.compute_profile()
                     n.assignee = node.assignee
@@ -168,7 +168,7 @@ def extend_plan(root: Node, subjects: dict()):
             enc = node.vp.intersection(subjects[node.parent.assignee]['enc'])
             if len(enc):
                 n = Node(
-                    operation='encryption', Ap=set(), Ae=set(), enc_attr=enc, size=2,
+                    operation='encryption', Ap=set(), Ae=set(), enc_attr=enc, size=node.size,
                     print_label='Encrypt ' + str(enc), parent=node.parent, children=node)
                 n.compute_profile()
                 n.assignee = node.assignee
