@@ -3,7 +3,7 @@ from anytree.exporter import DotExporter
 from node import Node
 
 
-def export_tree(types: ['nodes', 'profiles'], filename, root):
+def export_tree(types, filename, root):
     if types == 'nodes':
         DotExporter(root, nodeattrfunc=node_attr, edgeattrfunc=lambda *args: "dir=back").to_picture(filename)
         return
