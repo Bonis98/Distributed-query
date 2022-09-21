@@ -23,4 +23,4 @@ if __name__ == '__main__':
     p.extend_plan(root, subjects)
     # Export results in two PDF documents
     export.export_tree('nodes', '../Tree.pdf', root.parent)
-    export.export_tree('profiles', '../Profile.pdf', root.parent)
+    export.export_tree('profiles', '../Profile.pdf', root)
