@@ -14,10 +14,11 @@ This is a project made for the master's thesis in my cybersecurity degree. The p
 
 <a id='Input'></a>
 # Input data to algorithm
-Inputs to the algorithm are given by three different CSV files:
+Inputs to the algorithm are given by four different CSV files:
 - [relations.cvs](CSV_data/relations.csv)
 - [tree.cvs](CSV_data/tree.csv)
 - [subjects.cvs](CSV_data/subjects.csv)
+- [authorizations.cvs](CSV_data/authorizations.csv)
 
 Folder [CSV_data](CSV_data) contains an example of that files
 
@@ -64,17 +65,30 @@ Parsing of [tree.csv](CSV_data/tree.csv) produces the following tree:
 ### subjects.csv
 This is the file modeling the subjects involved in query computation with its authorizations, structured as follows:
 - **subject**: Name of the subject
-- **plain**: Attributes for which the subject is authorized to view in plaintext form
-- **enc**: Attributes for which the subject is authorized to view in encrypted form
 - **comp_price**: computational price of the subject
 - **transfer_price**: transfer price of the subject
 
-Parsing of [subjects.csv](CSV_data/subjects.csv) produces the following output:
-- [NCPSJI,-]&#8594;U with computational price 1 and transfer price 1
-- [PC,NSJI]&#8594;X with computational price 2 and transfer price 2
-- [DPJI,CNS]&#8594;Y with computational price 3 and transfer price 3
-- [NCS,PJI]&#8594;Z with computational price 4 and transfer price 4
-- [-,NDPCJI]&#8594;F with computational price 5 and transfer price 6
-- [-,NCSJI]&#8594;C with computational price 6 and transfer price 7
+Parsing of [subjects.csv](CSV_data/subjects.csv) produces the following subjects:
+- U with computational price 1 and transfer price 1
+- X with computational price 2 and transfer price 2
+- Y with computational price 3 and transfer price 3
+- Z with computational price 4 and transfer price 4
+- F with computational price 5 and transfer price 6
+- C with computational price 6 and transfer price 7
+
+<a id='authorizations'></a>
+### authorizations.csv
+This is the file modeling the authorizations involved in query computation, structured as follows:
+- **subject**: Name of the subject (already specified in [subjects.csv](CSV_data/subjects.csv))
+- **plain**: Attributes for which the subject is authorized to view in plaintext form
+- **enc**: Attributes for which the subject is authorized to view in encrypted form
+
+Parsing of [authorizations.csv](CSV_data/authorizations.csv) produces the following authorizations:
+- [NCPSJI,-]&#8594;U
+- [PC,NSJI]&#8594;X
+- [DPJI,CNS]&#8594;Y
+- [NCS,PJI]&#8594;Z
+- [-,NDPCJI]&#8594;F
+- [-,NCSJI]&#8594;C
 
 [back](#top)
