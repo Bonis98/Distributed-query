@@ -18,8 +18,6 @@ if __name__ == '__main__':
     root.parent.assignee = 'U'
     # Identify candidates for each node in the tree
     p.identify_candidates(root, subjects, authorizations)
-    """for pre, fill, node in RenderTree(root):
-        print("%s%s %s cand: %s" % (pre, fill, node.name, node.candidates))"""
     to_enc_dec = set()
     # Assign nodes to subjects and insert re-encryption operations
     p.compute_assignment(root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
