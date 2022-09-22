@@ -13,7 +13,7 @@ def read_input():
 
 def read_tree():
     nodes = list()
-    df = pd.read_csv('CSV_data/nodes.csv')
+    df = pd.read_csv('CSV_data/tree.csv')
     df['parent'] = df['parent'].fillna(value=0)
     df = df.fillna(value='')
     df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})

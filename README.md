@@ -16,7 +16,7 @@ This is a project made for the master's thesis in my cybersecurity degree. The p
 # Input data to algorithm
 Inputs to the algorithm are given by three different CSV files:
 - [relations.cvs](CSV_data/relations.csv)
-- [nodes.cvs](CSV_data/nodes.csv)
+- [tree.cvs](CSV_data/tree.csv)
 - [subjects.cvs](CSV_data/subjects.csv)
 
 Folder [CSV_data](CSV_data) contains an example of that files
@@ -42,7 +42,7 @@ Parsing of [relations.csv](CSV_data/relations.csv) produces the following two ba
     - I has an encryption cost of 3, a decryption cost of 6 and a size of 9
 
 <a id='nodes'></a>
-### nodes.csv
+### tree.csv
 This is the file modeling the query tree plan, structured as follows:
 - **ID**: Used to associate a relationship with a leaf node
 - **operation**: Operation of the query associated with the node
@@ -54,7 +54,7 @@ This is the file modeling the query tree plan, structured as follows:
 - **group_attr**: if the operation associated with the node is a *group-by*, this is the set of attributes on which the group-by clause is evaluated
 - **parent**: parent node of current node, used to build the tree
 
-Parsing of [nodes.csv](CSV_data/nodes.csv) produces the following tree:
+Parsing of [tree.csv](CSV_data/tree.csv) produces the following tree:
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/25297357/191472462-4ed9ed1f-9301-4b5f-8e05-6d27d1f111db.png" alt="nodes" width="200" align="center"/>
