@@ -1,4 +1,4 @@
-from anytree import RenderTree
+import sys
 
 import export
 import procedures as p
@@ -6,6 +6,9 @@ from input import read_input
 from node import Node
 
 if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        raise ValueError("main: must specify tree and profile save path")
+        exit(0)
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     manual_assignment = list('YYZC')
     # Read input data for the algorithm
@@ -24,5 +27,5 @@ if __name__ == '__main__':
     # Inject encryption/decryption operation
     p.extend_plan(root, subjects, authorizations)
     # Export results in two PDF documents
-    export.export_tree('nodes', '../Tree.pdf', root.parent)
-    export.export_tree('profiles', '../Profile.pdf', root)
+    export.export_tree('nodes', sys.argv[1] + 'Tree.pdf', root.parent)
+    export.export_tree('profiles', sys.argv[2] + 'Profile.pdf', root)
