@@ -1,3 +1,5 @@
+from anytree import RenderTree
+
 import export
 import procedures as p
 from input import read_input
@@ -7,7 +9,7 @@ if __name__ == '__main__':
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     manual_assignment = list('YYZC')
     # Read input data for the algorithm
-    root, relations, subjects, avg_comp_price, avg_transfer_price = read_input()
+    root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price = read_input()
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
@@ -15,12 +17,14 @@ if __name__ == '__main__':
          children={root})
     root.parent.assignee = 'U'
     # Identify candidates for each node in the tree
-    p.identify_candidates(root, subjects)
+    p.identify_candidates(root, subjects, authorizations)
+    """for pre, fill, node in RenderTree(root):
+        print("%s%s %s cand: %s" % (pre, fill, node.name, node.candidates))"""
     to_enc_dec = set()
     # Assign nodes to subjects and insert re-encryption operations
-    p.compute_assignment(root, subjects, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
+    p.compute_assignment(root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
     # Inject encryption/decryption operation
-    p.extend_plan(root, subjects)
+    p.extend_plan(root, subjects, authorizations)
     # Export results in two PDF documents
     export.export_tree('nodes', '../Tree.pdf', root.parent)
     export.export_tree('profiles', '../Profile.pdf', root)

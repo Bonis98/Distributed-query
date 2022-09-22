@@ -7,8 +7,8 @@ def read_input():
     nodes = read_tree()
     relations = read_relations(nodes)
     subjects, avg_comp_price, avg_transfer_price = read_subjects()
-
-    return nodes[0], relations, subjects, avg_comp_price, avg_transfer_price
+    authorizations = read_authorizations()
+    return nodes[0], relations, subjects, authorizations, avg_comp_price, avg_transfer_price
 
 
 def read_tree():
@@ -48,7 +48,8 @@ def read_relations(nodes: list()):
 
 def read_subjects():
     df = pd.read_csv('CSV_data/subjects.csv')
-    df = df.fillna(value='')
+    if df.isnull().values.any():
+        raise ValueError("Input: Subjects dataframe can't contain NaN values")
     df['sum'] = df['comp_price'] + df['transfer_price']
     df = df.sort_values(by=['sum'])
     df = df.drop(columns=['sum'])
@@ -56,3 +57,9 @@ def read_subjects():
     avg_comp_price = df['comp_price'].mean()
     avg_transfer_price = df['transfer_price'].mean()
     return subjects, avg_comp_price, avg_transfer_price
+
+
+def read_authorizations():
+    df = pd.read_csv('CSV_data/authorizations.csv')
+    df = df.fillna(value='')
+    return df.set_index('subject').T.to_dict('dict')
