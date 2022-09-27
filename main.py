@@ -10,7 +10,8 @@ if __name__ == '__main__':
         raise ValueError("main: must specify tree and profile save path")
         exit(0)
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
-    manual_assignment = list('YYZC')
+    if len(sys.argv) > 3:
+        manual_assignment = list(sys.argv[3])
     # Read input data for the algorithm
     root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price = read_input()
     # Compute cost of any node assigned to any subject
@@ -23,7 +24,8 @@ if __name__ == '__main__':
     p.identify_candidates(root, subjects, authorizations)
     to_enc_dec = set()
     # Assign nodes to subjects and insert re-encryption operations
-    p.compute_assignment(root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
+    p.compute_assignment(
+        root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
     # Inject encryption/decryption operation
     p.extend_plan(root, subjects, authorizations)
     # Export results in two PDF documents
