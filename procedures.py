@@ -3,7 +3,6 @@ import math
 from anytree import PostOrderIter, PreOrderIter
 
 from node import Node
-from subject import Subject
 
 
 def compute_cost(root, subjects: dict):
@@ -147,7 +146,7 @@ def compute_assignment(
                             n.assignee = node.assignee
 
 
-def extend_plan(root: Node, subjects: dict, authorizations: dict):
+def extend_plan(root: Node, authorizations: dict):
     for node in PostOrderIter(root):
         if node.is_root:
             decrypt = node.ve.union(node.vE)
@@ -174,7 +173,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
                 n.assignee = node.assignee
 
 
-def __is_authorized(authorization: Subject, node: Node):
+def __is_authorized(authorization, node: Node):
     # Authorized for plaintext
     if not node.vp.union(node.ip).issubset(set(authorization['plain'])):
         return False

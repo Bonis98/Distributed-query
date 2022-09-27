@@ -32,7 +32,7 @@ def read_tree():
     return nodes
 
 
-def read_relations(nodes: list()):
+def read_relations(nodes: list):
     relations = list()
     df = pd.read_csv('CSV_data/relations.csv')
     df = df.astype('str')

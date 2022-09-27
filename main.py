@@ -8,7 +8,7 @@ from node import Node
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         raise ValueError("main: must specify tree and profile save path")
-        exit(0)
+    manual_assignment = None
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     if len(sys.argv) > 3:
         manual_assignment = list(sys.argv[3])
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     p.compute_assignment(
         root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
     # Inject encryption/decryption operation
-    p.extend_plan(root, subjects, authorizations)
+    p.extend_plan(root, authorizations)
     # Export results in two PDF documents
     export.export_tree('nodes', sys.argv[1] + 'Tree.pdf', root.parent)
     export.export_tree('profiles', sys.argv[2] + 'Profile.pdf', root)
