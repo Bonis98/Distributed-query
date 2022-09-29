@@ -22,7 +22,7 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
             # Initializes profile to all empty except for vE that is set to all relation's attributes
             node.compute_profile()
             # Candidates are any subject
-            node.candidates = subjects.keys()
+            node.candidates = list(subjects.keys())
             # No need to initialize totap and totae (already empty)
         else:
             # Ap and Ae already initialized
@@ -34,7 +34,7 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
             # Initialize candidates to empty
             node.candidates = list()
             # Monotonicity property
-            cand = subjects.keys()
+            cand = list(subjects.keys())
             if len(node.children) == 1:
                 if node.children[0].Ap.issubset(node.ip):
                     cand = node.children[0].candidates
