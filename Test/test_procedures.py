@@ -56,3 +56,25 @@ def test_compute_cost():
            * 3 \
            + node.children[0].comp_cost['X'] \
            + node.children[1].comp_cost['X']
+
+
+def test_is_authorized():
+    # Create a tree with only one node
+    root = Node(operation="selection", Ap=set(), Ae=set(), enc_attr=set(), size=2)
+    # Assign a profile
+    root.vp = set("JI")
+    root.ve = set("NSC")
+    root.eq = set()
+    root.eq.add(frozenset("JS"))
+    # Create three subjects with different authorizations
+    csv_data = io.StringIO("subject,plain,enc\nU,NCPSJI,\nX,PC,NSJI\nY,JI,NS\nZ,DPJI,CNS")
+    df = pd.read_csv(csv_data).fillna(value='')
+    authorization = df.set_index('subject').T.to_dict('dict')
+    # Authorized
+    assert __is_authorized(authorization['U'], root)
+    # No plain visibility
+    assert not __is_authorized(authorization['X'], root)
+    # No enc visibility
+    assert not __is_authorized(authorization['Y'], root)
+    # No uniform visibility
+    assert not __is_authorized(authorization['Z'], root)
