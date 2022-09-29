@@ -25,14 +25,6 @@ class Ops:
         self.enc_attr = enc_attr
         self.operation = operation
 
-    # Returns all the attributes of an operation
-    def get_attributes(self):
-        return self.Ap.union(self.Ae).union(self.enc_attr)
-
-    # Returns the attributes count of an operation
-    def num_attr(self):
-        return len(self.Ap.union(self.Ae).union(self.enc_attr))
-
     def get_op_cost(self):
         op_cost = {
             'projection': 1,
