@@ -47,9 +47,18 @@ Parsing of [relations.csv](CSV_data/relations.csv) produces the following two ba
 This is the file modeling the query tree plan, structured as follows:
 - **ID**: Used to associate a relationship with a leaf node
 - **operation**: Operation of the query associated with the node
+  - Projection
+  - Selection
+  - Cartesian
+    - Cartesian product requires to put manually attributes in Ap, Ae and enc_attr taken from children
+  - Join
+  - Group-by
+  - Encryption
+  - Decryption
+  - Re-encryption
 - **Ap**: Set of attributes that need to be in plaintext to evaluate the operation associated with the node
 - **Ae**: Set of attributes that need to be re-encrypted to evaluate the operation associated with the node
-- **enc_attr**: Set of attributes encrypted in storage (default state for base relations)
+- **enc_attr**: Set of attributes encrypted in storage (default for base relations)
 - **size**: size of the node (used to compute computational cost of node)
 - **print_label**: label of the node to print when tree is exported 
 - **group_attr**: if the operation associated with the node is a *group-by*, this is the set of attributes on which the group-by clause is evaluated
