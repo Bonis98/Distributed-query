@@ -1,6 +1,7 @@
 import pandas as pd
 
-from node import Node, Relation
+from node import Node
+from relation import Relation
 
 
 def read_input():
