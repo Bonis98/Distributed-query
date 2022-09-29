@@ -3,7 +3,7 @@ import io
 import pandas as pd
 
 from node import Node
-from procedures import compute_cost
+from procedures import compute_cost, __is_authorized
 
 
 def test_compute_cost():
@@ -48,11 +48,11 @@ def test_compute_cost():
     # Check parent
     node = root
     assert len(node.comp_cost) == len(df.index)
-    assert node.comp_cost['U'] == df['comp_price'].values[0]\
-           * 3\
-           + node.children[0].comp_cost['U']\
+    assert node.comp_cost['U'] == df['comp_price'].values[0] \
+           * 3 \
+           + node.children[0].comp_cost['U'] \
            + node.children[1].comp_cost['U']
-    assert node.comp_cost['X'] == df['comp_price'].values[1]\
-           * 3\
-           + node.children[0].comp_cost['X']\
+    assert node.comp_cost['X'] == df['comp_price'].values[1] \
+           * 3 \
+           + node.children[0].comp_cost['X'] \
            + node.children[1].comp_cost['X']
