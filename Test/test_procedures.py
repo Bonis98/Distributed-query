@@ -1,9 +1,11 @@
 import io
 
 import pandas as pd
+from anytree import RenderTree
 
+from export import export_tree
 from node import Node
-from procedures import compute_cost, __is_authorized, identify_candidates
+from procedures import compute_cost, __is_authorized, identify_candidates, compute_assignment
 from relation import Relation
 
 
@@ -106,3 +108,50 @@ def test_identify_candidates():
     assert root.children[0].candidates == list('XYZ')
     assert root.children[1].candidates == list('XYZ')
     assert root.candidates == list('Z')
+
+
+def test_compute_assignment():
+    # Create three subjects
+    csv_data = io.StringIO('subject,comp_price,transfer_price\nX,1,1\nY,2,2\nZ,3,3')
+    df = pd.read_csv(csv_data)
+    subjects = df.set_index('subject').T.to_dict('dict')
+    # Create three authorizations
+    csv_data = io.StringIO('subject,plain,enc\nX,NS,PD\nY,NP,SD\nZ,,NS')
+    df = pd.read_csv(csv_data)
+    df = df.fillna(value='')
+    authorizations = df.set_index('subject').T.to_dict('dict')
+    # Create a base relation
+    r = Relation(storage_provider='S', attributes='NPSD', enc_costs='1234', dec_costs='1234', size='1234')
+    # Create a light query plan
+    root = Node(operation='join', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2)
+    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, parent=root)
+    n.relation = r
+    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('SD'), size=2, parent=root)
+    n.relation = r
+    # Set of re-encryption attributes
+    to_enc_dec = set()
+    # List of base relations
+    relations = list()
+    relations.append(r)
+    # Manual assignment of assignees
+    manual_assignment = list('XYZ')
+    compute_assignment(
+        root=root, subjects=subjects, authorizations=authorizations, to_enc_dec=to_enc_dec, relations=relations,
+        avg_comp_price=3, avg_transfer_price=3, manual_assignment=manual_assignment)
+    # Procedure should insert two re-encryption operation for N and S attributes
+    assert root.children[0].operation == 're-encryption'
+    assert root.children[0].Ae == set('N')
+    assert root.children[1].operation == 're-encryption'
+    assert root.children[1].Ae == set('S')
+    # Procedure should assign leaves to storage provider
+    assert root.children[0].children[0].assignee == r.storage_provider
+    assert root.children[1].children[0].assignee == r.storage_provider
+    # Create a tree with only one node to test insertion of re-encryption operations at leaves
+    root = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, parent=root)
+    root.relation = r
+    # Insert a re-encryption of an attribute pushed down
+    to_enc_dec = set('N')
+    compute_assignment(
+        root=root, subjects=subjects, authorizations=authorizations, to_enc_dec=to_enc_dec, relations=relations,
+        avg_comp_price=3, avg_transfer_price=3, manual_assignment=manual_assignment)
+    assert root.parent.operation == 're-encryption'

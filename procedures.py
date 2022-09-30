@@ -85,9 +85,7 @@ def compute_assignment(
                             operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), re_encryption=True,
                             print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
-                        att = att.difference(dec)
-                        if not len(att):
-                            break
+                    att = att.difference(dec)
                 if len(att):
                     print('Error: %s attributes cannot be re-encrypted' % att)
                     exit()
