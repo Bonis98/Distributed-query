@@ -17,10 +17,10 @@ class Ops:
             self.select_multi_attr = select_multi_attr
         else:
             self.select_multi_attr = False
-        if len(Ap.intersection(Ae).intersection(enc_attr)):
+        if len(Ap.intersection(Ae, enc_attr)):
             raise ValueError('Ops: plain, re_enc and enc sets must be disjoint')
         if group_attr is not None:
-            if not (Ap.union(Ae).union(enc_attr)).issuperset(group_attr):
+            if not (Ap.union(Ae, enc_attr)).issuperset(group_attr):
                 raise ValueError('Ops: group_attr must be a valid attribute')
             else:
                 self.group_attr = group_attr
@@ -83,7 +83,7 @@ class Node(Ops, NodeMixin):
         if self.is_leaf:
             self.vp = self.Ap
             self.ve = self.Ae
-            self.vE = set(self.relation.attributes).difference(self.Ap).difference(self.Ae)
+            self.vE = set(self.relation.attributes).difference(self.Ap, self.Ae)
             self.ip = set()
             self.ie = set()
             self.eq = set()
@@ -100,7 +100,7 @@ class Node(Ops, NodeMixin):
             self.vE = self.vE.intersection(self.enc_attr)
         elif self.operation == 'selection' and not self.select_multi_attr:
             self.ip = self.ip.union(self.vp.intersection(self.Ap))
-            self.ie = self.ve.union(self.vE).intersection(self.Ae.union(self.enc_attr)).union(self.ie)
+            self.ie = self.ie.union(self.ve.union(self.vE).intersection(self.Ae.union(self.enc_attr)))
         elif self.operation == 'selection' and self.select_multi_attr:
             if len(self.Ap):
                 self.eq.add(frozenset(self.Ap))
@@ -112,13 +112,14 @@ class Node(Ops, NodeMixin):
             # Union of sets of children, already done by __assign_profile
             pass
         elif self.operation == 'join':
-            self.eq.add(frozenset(self.Ap.union(self.Ae).union(self.enc_attr)))
+            # Union of first 5 sets already done by __assign_profile
+            self.eq.add(frozenset(self.Ap.union(self.Ae, self.enc_attr)))
         elif self.operation == 'group-by':
             self.vp = self.vp.intersection(self.Ap.union(set(self.group_attr)))
             self.ve = self.ve.intersection(self.Ae.union(set(self.group_attr)))
             self.vE = self.vE.intersection(self.enc_attr.union(set(self.group_attr)))
-            self.ip = self.vp.intersection(self.group_attr).union(self.ip)
-            self.ie = self.ve.union(self.vE).intersection(self.group_attr).union(self.ie)
+            self.ip = self.ip.union(self.vp.intersection(self.group_attr))
+            self.ie = self.ie.union(self.ve.union(self.vE).intersection(self.group_attr))
         elif self.operation == 'encryption':
             self.vp = self.vp.difference(self.Ap)
             self.ve = self.ve.union(self.Ap)
