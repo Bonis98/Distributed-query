@@ -179,7 +179,7 @@ def __is_authorized(authorization, node: Node):
     if not node.vp.union(node.ip).issubset(set(authorization['plain'])):
         return False
     # Authorized for encrypted
-    if not node.ve.union(node.vE).union(node.ie).issubset(set(authorization['enc']).union(set(authorization['plain']))):
+    if not node.ve.union(node.vE, node.ie).issubset(set(authorization['enc']).union(set(authorization['plain']))):
         return False
     # Uniform visibility
     for eq in node.eq:
