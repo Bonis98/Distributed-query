@@ -1,11 +1,9 @@
 import io
 
 import pandas as pd
-from anytree import RenderTree
 
-from export import export_tree
 from node import Node
-from procedures import compute_cost, __is_authorized, identify_candidates, compute_assignment
+from procedures import compute_cost, __is_authorized, identify_candidates, compute_assignment, extend_plan
 from relation import Relation
 
 
@@ -128,6 +126,10 @@ def test_compute_assignment():
     n.relation = r
     n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('SD'), size=2, parent=root)
     n.relation = r
+    # Compute profile of nodes
+    for child in root.children:
+        child.compute_profile()
+    root.compute_profile()
     # Set of re-encryption attributes
     to_enc_dec = set()
     # List of base relations
@@ -155,3 +157,40 @@ def test_compute_assignment():
         root=root, subjects=subjects, authorizations=authorizations, to_enc_dec=to_enc_dec, relations=relations,
         avg_comp_price=3, avg_transfer_price=3, manual_assignment=manual_assignment)
     assert root.parent.operation == 're-encryption'
+
+
+def test_extend_plan():
+    # Create three authorizations
+    csv_data = io.StringIO('subject,plain,enc\nU,NS,\nX,NS,PD\nY,NP,SD\nZ,,NS')
+    df = pd.read_csv(csv_data)
+    df = df.fillna(value='')
+    authorizations = df.set_index('subject').T.to_dict('dict')
+    # Create a base relation
+    r = Relation(storage_provider='S', attributes='NPSD', enc_costs='1234', dec_costs='1234', size='1234')
+    # Create a light query plan
+    root = Node(operation='selection', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2)
+    n = Node(operation='projection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, parent=root)
+    # Assign relation to projection node
+    n.relation = r
+    # Compute profile of nodes
+    n.compute_profile()
+    root.compute_profile()
+    # Assign assignee to nodes
+    root.assignee = 'X'
+    n.assignee = 'Y'
+    # Insert a new node as parent of selection to test encryption
+    root = Node(operation='selection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, children={root})
+    root.compute_profile()
+    root.assignee = 'Z'
+    # Inject node assigned to user U formulating the query
+    root = Node(operation='query', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, children={root})
+    root.assignee = 'U'
+    extend_plan(root, authorizations)
+    # Test decryption for user U
+    assert root.parent.operation == 'decryption'
+    dec_node = root.children[0].children[0]
+    # Test encryption for selection on encrypted
+    assert dec_node.operation == 'encryption'
+    enc_node = dec_node.children[0].children[0]
+    # Test decryption for selection on plaintext values
+    assert enc_node.operation == 'decryption'

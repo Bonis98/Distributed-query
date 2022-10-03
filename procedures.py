@@ -147,17 +147,20 @@ def compute_assignment(
 def extend_plan(root: Node, authorizations: dict):
     for node in PostOrderIter(root):
         if node.is_root:
-            decrypt = node.ve.union(node.vE)
-            n = Node(
-                operation='decryption', Ap=decrypt, Ae=set(), enc_attr=set(), size=node.size,
-                print_label='Decrypt ' + str(decrypt), parent=node.parent, children=node)
-            n.assignee = 'U'
+            decrypt = set()
+            for child in node.children:
+                decrypt = decrypt.union(child.ve)
+            if len(decrypt):
+                n = Node(
+                    operation='decryption', Ap=set(), Ae=decrypt, enc_attr=set(),
+                    print_label='Decrypt ' + str(decrypt), children={node})
+                n.assignee = 'U'
         else:
             for child in node.children:
                 dec = node.Ap.intersection(child.vp.union(child.ve)).difference(child.vp)
                 if len(dec):
                     n = Node(
-                        operation='decryption', Ap=dec, Ae=set(), enc_attr=set(), size=child.size,
+                        operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
                         print_label='Decrypt ' + str(dec), parent=node, children={child})
                     n.compute_profile()
                     n.assignee = node.assignee
@@ -165,8 +168,8 @@ def extend_plan(root: Node, authorizations: dict):
             enc = node.vp.intersection(authorizations[node.parent.assignee]['enc'])
             if len(enc):
                 n = Node(
-                    operation='encryption', Ap=set(), Ae=set(), enc_attr=enc, size=node.size,
-                    print_label='Encrypt ' + str(enc), parent=node.parent, children=node)
+                    operation='encryption', Ap=enc, Ae=set(), enc_attr=set(),
+                    print_label='Encrypt ' + str(enc), parent=node.parent, children={node})
                 n.compute_profile()
                 n.assignee = node.assignee
 
