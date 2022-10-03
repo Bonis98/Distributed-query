@@ -22,13 +22,18 @@ def export_tree(types, filename, root, dot=False):
 
 def node_attr(node: Node):
     # If re-encryption draw a square box half greyed out with its assignee
-    if node.re_encryption:
+    if node.re_encryption or node.operation == 'decryption' or node.operation == 'encryption':
         label = 'label=<'
         for attr in node.Ae:
             label += attr
-        label += '<BR/><BR/>Assignee:&nbsp;<B>' + node.assignee + '</B>'
+        label += '<BR/><BR/><BR/>Assignee:&nbsp;<B>' + node.assignee + '</B>'
         label += '>'
-        label += 'shape=box, style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
+        if node.re_encryption:
+            label += 'style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
+        elif node.operation == 'encryption':
+            label += 'style=filled, fillcolor=\"lightgrey\"'
+    elif node.operation == 'query':
+        label = 'label=<User formulating the query>, shape=box'
     # All the other nodes goes in a normal circle, with candidates and assignee in bold
     else:
         label = node.name
@@ -43,15 +48,11 @@ def node_attr(node: Node):
         label += '<br/><br/>'
         # If node is not a leaf node, print candidates
         if not node.is_leaf:
+            label += 'Candidates: <B>'
             for cand in node.candidates:
-                if cand == node.assignee:
-                    label += '<B>' + cand + '</B>'
-                    continue
                 label += cand
-            label += '>'
-    # Leaf nodes goes in a square box
-    if node.is_leaf:
-        label += 'Assignee:&nbsp;<B>' + node.assignee + '</B>'
+            label += '</B>'
+        label += '<br/>Assignee: <B>' + node.assignee + '</B>'
         label += '>'
         label += 'shape=box'
     if not len(node.candidates):
@@ -66,7 +67,7 @@ def node_profile(node: Node):
         for attr in node.Ae:
             label += attr
         label += '>'
-        label += 'shape=box, style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
+        label += 'style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
     else:
         # Need to determine max len of first and second row in order to fill shorter sets with spaces
         first_len = len(node.vp) if len(node.vp) > len(node.ip) else len(node.ip)
