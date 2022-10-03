@@ -67,7 +67,7 @@ class Node(Ops, NodeMixin):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr, select_multi_attr)
         self.parent = parent
         self.re_encryption = re_encryption
-        if operation != 're-encryption':
+        if operation != 're-encryption' and operation != 'encryption' and operation != 'decryption':
             if type(size) != int:
                 raise TypeError('Node: size must be an integer, not %s' % type(size))
             self.size = size
