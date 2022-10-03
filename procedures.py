@@ -153,7 +153,7 @@ def extend_plan(root: Node, authorizations: dict):
             if len(decrypt):
                 n = Node(
                     operation='decryption', Ap=set(), Ae=decrypt, enc_attr=set(),
-                    print_label='Decrypt ' + str(decrypt), children={node})
+                    print_label='Decrypt ' + str(decrypt), parent=node, children={node.children[0]})
                 n.assignee = 'U'
         else:
             for child in node.children:
