@@ -27,7 +27,6 @@ if __name__ == '__main__':
     p.compute_assignment(
         root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
     # Inject encryption/decryption operation
-    p.extend_plan(root, authorizations)
-    # Export results in two PDF documents
-    export.export_tree('nodes', sys.argv[1] + 'Tree.pdf', root.parent)
-    export.export_tree('profiles', sys.argv[2] + 'Profile.pdf', root)
+    p.extend_plan(root.root, subjects, authorizations)
+    # Export results in a PDF documents
+    export.export_tree(sys.argv[1] + 'Tree.pdf', root.root)

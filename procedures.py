@@ -43,7 +43,7 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
                     cand = node.children[0].candidates
                     for candidate in node.children[1].candidates:
                         if candidate not in cand:
-                            cand.appen(candidate)
+                            cand.append(candidate)
             for subject in cand:
                 # Authorized for current node
                 if __is_authorized(authorizations[subject], node=node):
@@ -144,7 +144,7 @@ def compute_assignment(
                             n.assignee = node.assignee
 
 
-def extend_plan(root: Node, authorizations: dict):
+def extend_plan(root: Node, subjects: dict, authorizations: dict):
     for node in PostOrderIter(root):
         if node.is_root:
             decrypt = set()
@@ -157,12 +157,14 @@ def extend_plan(root: Node, authorizations: dict):
                 n.assignee = 'U'
         else:
             for child in node.children:
-                dec = node.Ap.intersection(child.vp.union(child.ve)).difference(child.vp)
+                dec = node.Ap.intersection(child.ve.union(child.vE)).difference(child.vp)
                 if len(dec):
                     n = Node(
                         operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
                         print_label='Decrypt ' + str(dec), parent=node, children={child})
                     n.compute_profile()
+                    # Candidates need to be re-identified after inserting a decryption operation
+                    identify_candidates(node, subjects, authorizations)
                     n.assignee = node.assignee
             node.compute_profile()
             enc = node.vp.intersection(authorizations[node.parent.assignee]['enc'])
@@ -171,6 +173,8 @@ def extend_plan(root: Node, authorizations: dict):
                     operation='encryption', Ap=enc, Ae=set(), enc_attr=set(),
                     print_label='Encrypt ' + str(enc), parent=node.parent, children={node})
                 n.compute_profile()
+                # Candidates need to be re-identified after inserting an encryption operation
+                identify_candidates(node, subjects, authorizations)
                 n.assignee = node.assignee
 
 

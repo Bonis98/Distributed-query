@@ -20,15 +20,20 @@ def read_tree():
     df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})
     df = df.astype({'Ap': 'str', 'Ae': 'str', 'enc_attr': 'str'})
     for idx, row in df.iterrows():
+        if row['operation'] == 'selection':
+            if len(row['Ap']) > 1 or len(row['Ae']) > 1 or len(row['enc_attr']) > 1:
+                multi_attr = True
+            else:
+                multi_attr = False
         if not idx:
             node = Node(
                 operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], enc_attr=row['enc_attr'], size=row['size'],
-                print_label=row['print_label'], group_attr=row['group_attr'])
+                print_label=row['print_label'], group_attr=row['group_attr'], select_multi_attr=multi_attr)
         else:
             node = Node(
                 operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], enc_attr=row['enc_attr'],
-                size=row['size'],
-                print_label=row['print_label'], group_attr=row['group_attr'], parent=nodes[row['parent'] - 1])
+                size=row['size'], print_label=row['print_label'], group_attr=row['group_attr'],
+                select_multi_attr=multi_attr, parent=nodes[row['parent'] - 1])
         nodes.append(node)
     return nodes
 
