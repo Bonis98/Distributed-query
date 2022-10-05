@@ -19,12 +19,11 @@ def read_tree():
     df = df.fillna(value='')
     df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})
     df = df.astype({'Ap': 'str', 'Ae': 'str', 'enc_attr': 'str'})
+    multi_attr = False
     for idx, row in df.iterrows():
         if row['operation'] == 'selection':
             if len(row['Ap']) > 1 or len(row['Ae']) > 1 or len(row['enc_attr']) > 1:
                 multi_attr = True
-            else:
-                multi_attr = False
         if not idx:
             node = Node(
                 operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], enc_attr=row['enc_attr'], size=row['size'],

@@ -160,7 +160,11 @@ def test_compute_assignment():
 
 
 def test_extend_plan():
-    # Create three authorizations
+    # Create four subjects
+    csv_data = io.StringIO('subject,comp_price,transfer_price\nU,1,1\nX,1,1\nY,2,2\nZ,3,3')
+    df = pd.read_csv(csv_data)
+    subjects = df.set_index('subject').T.to_dict('dict')
+    # Create four authorizations
     csv_data = io.StringIO('subject,plain,enc\nU,NS,\nX,NS,PD\nY,NP,SD\nZ,,NS')
     df = pd.read_csv(csv_data)
     df = df.fillna(value='')
@@ -185,10 +189,10 @@ def test_extend_plan():
     # Inject node assigned to user U formulating the query
     root = Node(operation='query', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, children={root})
     root.assignee = 'U'
-    extend_plan(root, authorizations)
+    extend_plan(root, subjects, authorizations)
     # Test decryption for user U
-    assert root.parent.operation == 'decryption'
-    dec_node = root.children[0].children[0]
+    assert root.children[0].operation == 'decryption'
+    dec_node = root.children[0].children[0].children[0]
     # Test encryption for selection on encrypted
     assert dec_node.operation == 'encryption'
     enc_node = dec_node.children[0].children[0]
