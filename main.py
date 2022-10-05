@@ -6,7 +6,7 @@ from input import read_input
 from node import Node
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         raise ValueError("main: must specify tree export path")
     manual_assignment = None
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
