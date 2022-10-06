@@ -58,15 +58,14 @@ class Node(Ops, NodeMixin):
     # Base relation
     relation = None
     assignee = str()
-    re_encryption = False
     comp_cost = dict()
 
     def __init__(
-            self, operation, Ap: set, Ae: set, enc_attr: set, size=None, re_encryption=False,
+            self, operation, Ap: set, Ae: set, enc_attr: set, size=None, cryptographic=False,
             print_label=None, group_attr=None, select_multi_attr=False, parent=None, children=None):
         super().__init__(operation, Ap, Ae, enc_attr, group_attr, select_multi_attr)
         self.parent = parent
-        self.re_encryption = re_encryption
+        self.cryptographic = cryptographic
         if operation != 're-encryption' and operation != 'encryption' and operation != 'decryption':
             if type(size) != int:
                 raise TypeError('Node: size must be an integer, not %s' % type(size))
@@ -113,6 +112,9 @@ class Node(Ops, NodeMixin):
             pass
         elif self.operation == 'join':
             # Union of first 5 sets already done by __assign_profile
+            self.vp = self.vp.union(self.Ap)
+            self.ve = self.ve.difference(self.Ap)
+            self.vE = self.vE.difference(self.Ap)
             self.eq.add(frozenset(self.Ap.union(self.Ae, self.enc_attr)))
         elif self.operation == 'group-by':
             self.vp = self.vp.intersection(self.Ap.union(set(self.group_attr)))
