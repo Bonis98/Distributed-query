@@ -13,14 +13,17 @@ def export_tree(filename, root, dot=False):
 
 def node_attr(node: Node):
     # If operation is a cryptographic operation draw an ellipse box
-    if node.re_encryption or node.operation == 'decryption' or node.operation == 'encryption':
+    if node.cryptographic:
         label = 'label=<'
         for attr in node.Ae:
             label += attr
+        if not len(node.Ae):
+            for attr in node.Ap:
+                label += attr
         label += '<BR/>Assignee:&nbsp;<B>' + node.assignee + '</B>'
         label += '>'
         # Re-encryption is half greyed out
-        if node.re_encryption:
+        if node.operation == 're-encryption':
             label += 'style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
         # Encryption is totally greyed out
         elif node.operation == 'encryption':
@@ -60,7 +63,7 @@ def node_attr(node: Node):
         label += '<td border="0" colspan="3">'
         # Print candidates
         if not node.is_leaf:
-            label += 'Candidates: <B>'
+            label += 'Candidates:<B> '
             for cand in node.candidates:
                 label += cand
             label += '</B>'
@@ -79,7 +82,7 @@ def node_attr(node: Node):
         if not node.ie:
             label += ' '
         label += '</td></tr>'
-        label += '<tr><td border="0" colspan="3">Assignee: <B>' + node.assignee + '</B></td><td>'
+        label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td><td>'
         # eq sets need to be printed with ; in order to separate them
         for collection in node.eq:
             for attr in collection:
