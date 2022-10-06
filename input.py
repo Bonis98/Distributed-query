@@ -4,17 +4,17 @@ from node import Node
 from relation import Relation
 
 
-def read_input():
-    nodes = read_tree()
-    relations = read_relations(nodes)
-    subjects, avg_comp_price, avg_transfer_price = read_subjects()
-    authorizations = read_authorizations()
+def read_input(input_path):
+    nodes = read_tree(input_path)
+    relations = read_relations(input_path, nodes)
+    subjects, avg_comp_price, avg_transfer_price = read_subjects(input_path)
+    authorizations = read_authorizations(input_path)
     return nodes[0], relations, subjects, authorizations, avg_comp_price, avg_transfer_price
 
 
-def read_tree():
+def read_tree(input_path):
     nodes = list()
-    df = pd.read_csv('CSV_data/tree.csv')
+    df = pd.read_csv(input_path + 'tree.csv')
     df['parent'] = df['parent'].fillna(value=0)
     df = df.fillna(value='')
     df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})
@@ -37,9 +37,9 @@ def read_tree():
     return nodes
 
 
-def read_relations(nodes: list):
+def read_relations(input_path, nodes: list):
     relations = list()
-    df = pd.read_csv('CSV_data/relations.csv')
+    df = pd.read_csv(input_path + 'relations.csv')
     df = df.astype('str')
     df = df.astype({'node_id': int})
     for idx, row in df.iterrows():
@@ -51,8 +51,8 @@ def read_relations(nodes: list):
     return relations
 
 
-def read_subjects():
-    df = pd.read_csv('CSV_data/subjects.csv')
+def read_subjects(input_path):
+    df = pd.read_csv(input_path + 'subjects.csv')
     if df.isnull().values.any():
         raise ValueError("Input: Subjects dataframe can't contain NaN values")
     df['sum'] = df['comp_price'] + df['transfer_price']
@@ -64,7 +64,7 @@ def read_subjects():
     return subjects, avg_comp_price, avg_transfer_price
 
 
-def read_authorizations():
-    df = pd.read_csv('CSV_data/authorizations.csv')
+def read_authorizations(input_path):
+    df = pd.read_csv(input_path + 'authorizations.csv')
     df = df.fillna(value='')
     return df.set_index('subject').T.to_dict('dict')
