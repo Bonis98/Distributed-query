@@ -82,14 +82,14 @@ def compute_assignment(
                             .issubset(set(authorizations[cand]['plain']).union(set(authorizations[cand]['enc']))):
                         # Insert re-encryption node for 'dec' as parent of current node
                         n = Node(
-                            operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), re_encryption=True,
+                            operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), cryptographic=True,
                             print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
                     att = att.difference(dec)
                 if len(att):
                     print('Error: %s attributes cannot be re-encrypted' % att)
                     exit()
-        elif not node.re_encryption:
+        elif not node.cryptographic:
             for cand in node.candidates:
                 # Calculate transfer cost of relation
                 if cand != node.parent.assignee:
@@ -125,7 +125,7 @@ def compute_assignment(
             if len(to_enc_dec.intersection(set(authorizations[node.assignee]['plain']))):
                 Ae = to_enc_dec.intersection(set(authorizations[node.assignee]['plain']))
                 n = Node(
-                    operation='re-encryption', Ap=set(), Ae=Ae, enc_attr=set(), re_encryption=True,
+                    operation='re-encryption', Ap=set(), Ae=Ae, enc_attr=set(), cryptographic=True,
                     print_label='Re-encrypt ' + str(Ae), parent=node.parent, children={node})
                 n.assignee = node.assignee
                 to_enc_dec = to_enc_dec.difference(set(authorizations[node.assignee]['plain']))
@@ -135,12 +135,23 @@ def compute_assignment(
                 # Need to search correct path in the tree
                 re_enc = node.Ae.intersection(set(authorizations[node.assignee]['plain']))
                 for child in node.children:
+                    # Insertion of encryption is not mentioned in the paper
+                    enc = re_enc.intersection(child.vp)
+                    re_enc = re_enc.difference(child.vp)
                     for leaf in child.leaves:
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
                         if len(path_attr):
                             n = Node(
-                                operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), re_encryption=True,
+                                operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), cryptographic=True,
                                 print_label='Re-encrypt ' + str(path_attr), parent=node, children={child})
+                            child = n
+                            n.assignee = node.assignee
+                        path_attr = leaf.Ae.union(leaf.enc_attr).intersection(enc)
+                        if len(path_attr):
+                            n = Node(
+                                operation='encryption', Ap=path_attr, Ae=set(), enc_attr=set(), cryptographic=True,
+                                print_label='Encrypt ' + str(path_attr), parent=node, children={child})
+                            child = n
                             n.assignee = node.assignee
 
 
@@ -149,11 +160,11 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
         if node.is_root:
             decrypt = set()
             for child in node.children:
-                decrypt = decrypt.union(child.ve)
+                decrypt = decrypt.union(child.ve, child.vE)
             if len(decrypt):
                 n = Node(
                     operation='decryption', Ap=set(), Ae=decrypt, enc_attr=set(),
-                    print_label='Decrypt ' + str(decrypt), parent=node, children={node.children[0]})
+                    print_label='Decrypt ' + str(decrypt), cryptographic=True, parent=node, children={node.children[0]})
                 n.assignee = 'U'
         else:
             for child in node.children:
@@ -161,7 +172,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
                 if len(dec):
                     n = Node(
                         operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
-                        print_label='Decrypt ' + str(dec), parent=node, children={child})
+                        print_label='Decrypt ' + str(dec), cryptographic=True, parent=node, children={child})
                     n.compute_profile()
                     # Candidates need to be re-identified after inserting a decryption operation
                     identify_candidates(node, subjects, authorizations)
@@ -171,7 +182,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
             if len(enc):
                 n = Node(
                     operation='encryption', Ap=enc, Ae=set(), enc_attr=set(),
-                    print_label='Encrypt ' + str(enc), parent=node.parent, children={node})
+                    print_label='Encrypt ' + str(enc), cryptographic=True, parent=node.parent, children={node})
                 n.compute_profile()
                 # Candidates need to be re-identified after inserting an encryption operation
                 identify_candidates(node, subjects, authorizations)
