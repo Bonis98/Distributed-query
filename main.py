@@ -1,5 +1,7 @@
 import sys
 
+from anytree import RenderTree
+
 import export
 import procedures as p
 from input import read_input
@@ -14,6 +16,7 @@ if __name__ == '__main__':
         manual_assignment = list(sys.argv[2])
     # Read input data for the algorithm
     root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price = read_input()
+    export.export_tree(sys.argv[1] + 'Plan.pdf', root.root)
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
