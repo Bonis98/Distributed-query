@@ -9,8 +9,10 @@ This is a project made for the master's thesis in my cybersecurity degree. The p
 3. Run `source env/bin/activate` to activate the virtual env
 4. Run `pip install -r requirements.txt` to install all the packages needed to run the project
     - If you don't have pip installed, you can find informations [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-pip)
-5. The script requires a command line argument representing the path where to save the pdf containing the tree resulting from the computation (e.g. '../' to save the pdf in the directory containing the script folder)
-    - Another optional argument could be given to manually assign node to candidate, in the form 'XYZ' to assign them to nodes in pre-order
+5. The script has three command line arguments:
+    - -p PATH, --path PATH: representing the path where to save the pdf containing the tree resulting from the computation (e.g. '../' to save the pdf in the directory containing the script folder)
+    - -m ASSIGNMENT, --manual ASSIGNMENT: Manually assign node to candidate, in the form 'XYZ' to assign them to nodes in pre-order
+    - -i INPUT, --input INPUT: Path from where take the input of the algorithm
 
 [back](#top)
 
