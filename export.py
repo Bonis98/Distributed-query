@@ -42,24 +42,26 @@ def node_attr(node: Node):
         if label.find('<sub>') != -1:
             label += '</sub>'
         label += '</td>'
-        label += '<td>'
-        # Print profile
-        for attr in node.vp:
-            label += attr
-        # If there are no attributes print a space
-        if not node.vp:
-            label += ' '
-        label += '</td><td bgcolor="lightgrey">'
-        for attr in node.ve:
-            label += attr
-        if not node.ve:
-            label += ' '
-        label += '</td><td bgcolor="lightgrey">'
-        for attr in node.vE:
-            label += attr
-        if not node.vE:
-            label += ' '
-        label += '</td></tr><tr>'
+        if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
+            # Print profile
+            label += '<td>'
+            for attr in node.vp:
+                label += attr
+            # If there are no attributes print a space
+            if not node.vp:
+                label += ' '
+            label += '</td><td bgcolor="lightgrey">'
+            for attr in node.ve:
+                label += attr
+            if not node.ve:
+                label += ' '
+            label += '</td><td bgcolor="lightgrey">'
+            for attr in node.vE:
+                label += attr
+            if not node.vE:
+                label += ' '
+            label += '</td>'
+        label += '</tr><tr>'
         label += '<td border="0" colspan="3">'
         # Print candidates
         if not node.is_leaf:
@@ -71,24 +73,29 @@ def node_attr(node: Node):
         else:
             label += ' '
         label += '</td>'
-        label += '<td>'
-        for attr in node.ip:
-            label += attr
-        if not node.ip:
-            label += ' '
-        label += '</td><td bgcolor="lightgrey">'
-        for attr in node.ie:
-            label += attr
-        if not node.ie:
-            label += ' '
-        label += '</td></tr>'
-        label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td><td>'
-        # eq sets need to be printed with ; in order to separate them
-        for collection in node.eq:
-            for attr in collection:
+        if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
+            label += '<td>'
+            for attr in node.ip:
                 label += attr
-            label += ';'
-        label += '</td></tr></table>>'
+            if not node.ip:
+                label += ' '
+            label += '</td><td bgcolor="lightgrey">'
+            for attr in node.ie:
+                label += attr
+            if not node.ie:
+                label += ' '
+            label += '</td>'
+        label += '</tr>'
+        label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td>'
+        if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
+            # eq sets need to be printed with ; in order to separate them
+            label += '<td>'
+            for collection in node.eq:
+                for attr in collection:
+                    label += attr
+                label += ';'
+            label += '</td>'
+        label += '</tr></table>>'
         label += 'shape=plain'
         if not node.eq:
             label += ' '
