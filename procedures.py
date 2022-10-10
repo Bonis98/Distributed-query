@@ -136,10 +136,14 @@ def compute_assignment(
                 re_enc = node.Ae.intersection(set(authorizations[node.assignee]['plain']))
                 for child in node.children:
                     # Insertion of encryption is not mentioned in the paper
-                    enc = re_enc.intersection(child.vp)
-                    re_enc = re_enc.difference(child.vp)
+                    enc = re_enc.intersection(child.Ap)
+                    re_enc = re_enc.difference(child.Ap)
                     for leaf in child.leaves:
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
+                        for descendant in node.descendants:
+                            path_attr = path_attr.difference(descendant.Ae)
+                            if not len(path_attr):
+                                break
                         if len(path_attr):
                             n = Node(
                                 operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), cryptographic=True,
