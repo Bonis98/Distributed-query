@@ -18,7 +18,7 @@ if __name__ == '__main__':
     manual_assignment = args.manual_assignment
     # Read input data for the algorithm
     root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price = read_input(args.input)
-    export.export_tree(args.path + 'Plan.pdf', root.root)
+    export.export_tree(args.path + 'Plan.pdf', root)
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
