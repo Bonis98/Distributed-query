@@ -37,10 +37,10 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
             cand = list(subjects.keys())
             if len(node.children) == 1:
                 if node.children[0].Ap.issubset(node.ip):
-                    cand = node.children[0].candidates
+                    cand = node.children[0].candidates.copy()
             else:
                 if node.children[0].Ap.union(node.children[1].Ap).issubset(node.ip):
-                    cand = node.children[0].candidates
+                    cand = node.children[0].candidates.copy()
                     for candidate in node.children[1].candidates:
                         if candidate not in cand:
                             cand.append(candidate)
@@ -145,18 +145,18 @@ def compute_assignment(
                             if not len(path_attr):
                                 break
                         if len(path_attr):
-                            n = Node(
+                            child = Node(
                                 operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), cryptographic=True,
                                 print_label='Re-encrypt ' + str(path_attr), parent=node, children={child})
-                            child = n
-                            n.assignee = node.assignee
+                            child.assignee = node.assignee
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(enc)
                         if len(path_attr):
-                            n = Node(
+                            child = Node(
                                 operation='encryption', Ap=path_attr, Ae=set(), enc_attr=set(), cryptographic=True,
                                 print_label='Encrypt ' + str(path_attr), parent=node, children={child})
-                            child = n
-                            n.assignee = node.assignee
+                            child.assignee = node.assignee
+                            # After inserting a cryptographic operation, recompute candidates
+                            identify_candidates(child.root, subjects, authorizations)
 
 
 def extend_plan(root: Node, subjects: dict, authorizations: dict):
@@ -177,9 +177,8 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
                     n = Node(
                         operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
                         print_label='Decrypt ' + str(dec), cryptographic=True, parent=node, children={child})
-                    n.compute_profile()
-                    # Candidates need to be re-identified after inserting a decryption operation
-                    identify_candidates(node, subjects, authorizations)
+                    # After inserting a cryptographic operation, recompute candidates
+                    identify_candidates(n.root, subjects, authorizations)
                     n.assignee = node.assignee
             node.compute_profile()
             enc = node.vp.intersection(authorizations[node.parent.assignee]['enc'])
@@ -189,7 +188,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
                     print_label='Encrypt ' + str(enc), cryptographic=True, parent=node.parent, children={node})
                 n.compute_profile()
                 # Candidates need to be re-identified after inserting an encryption operation
-                identify_candidates(node, subjects, authorizations)
+                identify_candidates(n.root, subjects, authorizations)
                 n.assignee = node.assignee
 
 
