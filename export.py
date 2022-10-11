@@ -39,6 +39,7 @@ def node_attr(node: Node):
         label = label.replace('Group-by ', '&gamma;<sub>')
         label = label.replace('Join ', '⋈<sub>')
         label = label.replace('Projection ', '&pi;<sub>')
+        label = label.replace('Cartesian', '&times;')
         if label.find('<sub>') != -1:
             label += '</sub>'
         label += '</td>'
