@@ -85,7 +85,8 @@ def compute_assignment(
                             operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), cryptographic=True,
                             print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
-                    att = att.difference(dec)
+                        # This line in the paper was one indentation back
+                        att = att.difference(dec)
                 if len(att):
                     print('Error: %s attributes cannot be re-encrypted' % att)
                     exit()
@@ -133,8 +134,8 @@ def compute_assignment(
             # Insert re-encryption node for attributes that need to be re-encrypted
             if len(node.Ae.intersection(set(authorizations[node.assignee]['plain']))):
                 # Need to search correct path in the tree
-                re_enc = node.Ae.intersection(set(authorizations[node.assignee]['plain']))
                 for child in node.children:
+                    re_enc = node.Ae.intersection(set(authorizations[node.assignee]['plain']))
                     # Insertion of encryption is not mentioned in the paper
                     enc = re_enc.intersection(child.Ap)
                     re_enc = re_enc.difference(child.Ap)
