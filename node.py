@@ -1,3 +1,5 @@
+import logging
+
 from anytree import NodeMixin
 
 
@@ -78,6 +80,7 @@ class Node(Ops, NodeMixin):
 
     # Computes the profile of a node (in according to def 2.2)
     def compute_profile(self):
+        logging.debug('Computing profile for node %s', self.name)
         # If node is a leaf, all attributes are encrypted in storage
         if self.is_leaf:
             self.vp = self.Ap

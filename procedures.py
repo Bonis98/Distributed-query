@@ -1,3 +1,4 @@
+import logging
 import math
 
 from anytree import PostOrderIter, PreOrderIter
@@ -6,8 +7,10 @@ from node import Node
 
 
 def compute_cost(root, subjects: dict):
+    logging.info('Computing costs of subjects...')
     for node in PostOrderIter(root):
         node.comp_cost = dict()
+        logging.debug('Processing costs on node %s', node.name)
         for subject in subjects:
             # Node cost
             node.comp_cost[subject] = (subjects[subject]['comp_price'] * node.get_op_cost())
@@ -17,7 +20,9 @@ def compute_cost(root, subjects: dict):
 
 
 def identify_candidates(root: Node, subjects: dict, authorizations: dict):
+    logging.info('Identifying candidates for each node...')
     for node in PostOrderIter(root):
+        logging.debug('Identifying candidate on node %s', node.name)
         if node.is_leaf:
             # Initializes profile to all empty except for vE that is set to all relation's attributes
             node.compute_profile()
@@ -57,6 +62,7 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
                         # If node has one child, then subject is authorized
                         else:
                             node.candidates.append(subject)
+            logging.debug('Final candidate(s) for %s: %s', node.name, node.candidates)
             # If node has no candidates, print error and stop the computation
             if len(node.candidates) == 0:
                 print('No candidates available for node ' + node.name)
@@ -66,7 +72,9 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
 def compute_assignment(
         root: Node, subjects: dict, authorizations: dict, to_enc_dec: set, relations: list,
         avg_comp_price: float, avg_transfer_price: float, manual_assignment=None):
+    logging.info('Computing assignee for each node...')
     for node in PreOrderIter(root):
+        logging.debug('Computing assignee for node %s', node.name)
         s_min = None
         min_cost = math.inf
         if node.is_leaf:
@@ -81,6 +89,7 @@ def compute_assignment(
                     if len(dec) and set(node.relation.attributes) \
                             .issubset(set(authorizations[cand]['plain']).union(set(authorizations[cand]['enc']))):
                         # Insert re-encryption node for 'dec' as parent of current node
+                        logging.debug('Inserting a re-encryption node for attribute(s) %s', dec)
                         n = Node(
                             operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), cryptographic=True,
                             print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
@@ -125,6 +134,7 @@ def compute_assignment(
             # Insert re-encryption node for to_enc_dec attributes pushed down
             if len(to_enc_dec.intersection(set(authorizations[node.assignee]['plain']))):
                 Ae = to_enc_dec.intersection(set(authorizations[node.assignee]['plain']))
+                logging.debug('Inserting a re-encryption node for attribute(s) %s', Ae)
                 n = Node(
                     operation='re-encryption', Ap=set(), Ae=Ae, enc_attr=set(), cryptographic=True,
                     print_label='Re-encrypt ' + str(Ae), parent=node.parent, children={node})
@@ -146,27 +156,33 @@ def compute_assignment(
                             if not len(path_attr):
                                 break
                         if len(path_attr):
+                            logging.debug('Inserting a re-encryption node for attribute(s) %s', path_attr)
                             child = Node(
                                 operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), cryptographic=True,
                                 print_label='Re-encrypt ' + str(path_attr), parent=node, children={child})
                             child.assignee = node.assignee
                         path_attr = leaf.Ae.union(leaf.enc_attr).intersection(enc)
                         if len(path_attr):
+                            logging.debug('Inserting an encryption node for attribute(s) %s', path_attr)
                             child = Node(
                                 operation='encryption', Ap=path_attr, Ae=set(), enc_attr=set(), cryptographic=True,
                                 print_label='Encrypt ' + str(path_attr), parent=node, children={child})
                             child.assignee = node.assignee
                             # After inserting a cryptographic operation, recompute candidates
                             identify_candidates(child.root, subjects, authorizations)
+        logging.debug('Assignee for %s: %s', node.name, node.assignee)
 
 
 def extend_plan(root: Node, subjects: dict, authorizations: dict):
+    logging.info('Extending plan with encryption/decryption operations...')
     for node in PostOrderIter(root):
+        logging.debug('Extending plan for node %s', node.name)
         if node.is_root:
             decrypt = set()
             for child in node.children:
                 decrypt = decrypt.union(child.ve, child.vE)
             if len(decrypt):
+                logging.debug('Inserting a decryption node for attribute(s) %s assigned to U', decrypt)
                 n = Node(
                     operation='decryption', Ap=set(), Ae=decrypt, enc_attr=set(),
                     print_label='Decrypt ' + str(decrypt), cryptographic=True, parent=node, children={node.children[0]})
@@ -175,6 +191,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
             for child in node.children:
                 dec = node.Ap.intersection(child.ve.union(child.vE)).difference(child.vp)
                 if len(dec):
+                    logging.debug('Inserting a decryption node for attribute(s) %s', dec)
                     n = Node(
                         operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
                         print_label='Decrypt ' + str(dec), cryptographic=True, parent=node, children={child})
@@ -184,6 +201,7 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
             node.compute_profile()
             enc = node.vp.intersection(authorizations[node.parent.assignee]['enc'])
             if len(enc):
+                logging.debug('Inserting an encryption node for attribute(s) %s', enc)
                 n = Node(
                     operation='encryption', Ap=enc, Ae=set(), enc_attr=set(),
                     print_label='Encrypt ' + str(enc), cryptographic=True, parent=node.parent, children={node})

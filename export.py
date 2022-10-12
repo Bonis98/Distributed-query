@@ -1,9 +1,15 @@
+import logging
+
 from anytree.exporter import DotExporter
 
 from node import Node
 
 
 def export_tree(filename, root, dot=False):
+    if 'Plan.pdf' in filename:
+        logging.info('Exporting query plan in a PDF file placed in ' + filename)
+    else:
+        logging.info('Exporting final query plan in a PDF file placed in ' + filename)
     # Dot parameter can be used to export a dot file instead of a picture
     if dot:
         DotExporter(root, nodeattrfunc=node_attr, edgeattrfunc=lambda *args: 'dir=back').to_dotfile(filename)

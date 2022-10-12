@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 
 from node import Node
@@ -5,6 +7,7 @@ from relation import Relation
 
 
 def read_input(input_path):
+    logging.info("Reading data from input files...")
     nodes = read_tree(input_path)
     relations = read_relations(input_path, nodes)
     subjects, avg_comp_price, avg_transfer_price = read_subjects(input_path)
@@ -13,6 +16,7 @@ def read_input(input_path):
 
 
 def read_tree(input_path):
+    logging.debug('Reading tree structure...')
     nodes = list()
     df = pd.read_csv(input_path + 'tree.csv')
     df['parent'] = df['parent'].fillna(value=0)
@@ -38,6 +42,7 @@ def read_tree(input_path):
 
 
 def read_relations(input_path, nodes: list):
+    logging.debug('Reading relations...')
     relations = list()
     df = pd.read_csv(input_path + 'relations.csv')
     df = df.astype('str')
@@ -52,6 +57,7 @@ def read_relations(input_path, nodes: list):
 
 
 def read_subjects(input_path):
+    logging.debug('Reading subjects...')
     df = pd.read_csv(input_path + 'subjects.csv')
     if df.isnull().values.any():
         raise ValueError("Input: Subjects dataframe can't contain NaN values")
@@ -65,6 +71,7 @@ def read_subjects(input_path):
 
 
 def read_authorizations(input_path):
+    logging.debug('Reading authorizations...')
     df = pd.read_csv(input_path + 'authorizations.csv')
     df = df.fillna(value='')
     return df.set_index('subject').T.to_dict('dict')

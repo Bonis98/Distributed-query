@@ -1,4 +1,7 @@
+import logging
 from argparse import ArgumentParser
+
+import coloredlogs as coloredlogs
 
 import export
 import procedures as p
@@ -7,13 +10,24 @@ from node import Node
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument("-p", "--path", dest="path", help="Path where to save exported PDFs plans",
-                        metavar="PATH", required=True)
-    parser.add_argument("-m", "--manual", type=list, metavar='ASSIGNMENT', dest="manual_assignment",
-                        help="Manual assignment of candidates to nodes")
-    parser.add_argument("-i", "--input", metavar='INPUT', dest="input",
-                        help="Path from where read input", required=True)
+    parser.add_argument(
+        "-p", "--path", dest="path", help="Path where to save exported PDFs plans", metavar="PATH", required=True)
+    parser.add_argument(
+        "-m", "--manual", type=list, metavar='ASSIGNMENT',
+        dest="manual_assignment", help="Manual assignment of candidates to nodes")
+    parser.add_argument(
+        "-i", "--input", metavar='INPUT', dest="input", help="Path from where read input", required=True)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        '-v', '--verbose', help="Be verbose", action="store_const",
+        dest="loglevel", const=logging.INFO, default=logging.WARNING)
+    group.add_argument(
+        '-d', '--debug', help="Print lots of debugging statements",
+        action="store_const", dest="loglevel", const=logging.DEBUG)
     args = parser.parse_args()
+    coloredlogs.install(
+        level=args.loglevel, fmt='%(asctime)s [%(funcName)s] %(levelname)s %(message)s', datefmt='%H:%M:%S')
+    print('Starting program...')
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     manual_assignment = args.manual_assignment
     # Read input data for the algorithm
