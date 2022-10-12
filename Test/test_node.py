@@ -7,7 +7,7 @@ def test_compute_profile():
     r = Relation(
         storage_provider='S', attributes='NSPC', enc_costs=list('1234'), dec_costs=list('1234'), size=list('1234'))
     # Create a tree with only one node in order to test projection
-    root = Node(operation='projection', Ap=set('N'), Ae=set('S'), enc_attr=set('P'), size=2)
+    root = Node(operation='projection', Ap=set('N'), Ae=set('S'), enc_attr=set('P'), size=2, print_label='Test')
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -18,7 +18,7 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == set()
     # create a new node in order to test selection in the form of 'a op x'
-    root = Node(operation='selection', Ap=set('N'), Ae=set('S'), enc_attr=set(), size=2, select_multi_attr=False)
+    root = Node(operation='selection', Ap=set('N'), Ae=set('S'), enc_attr=set(), size=2, print_label='Test', select_multi_attr=False)
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -29,7 +29,7 @@ def test_compute_profile():
     assert root.ie == set('S')
     assert root.eq == set()
     # create a new node in order to test selection in the form of a_i op a_j
-    root = Node(operation='selection', Ap=set('NS'), Ae=set('PC'), enc_attr=set(), size=2, select_multi_attr=True)
+    root = Node(operation='selection', Ap=set('NS'), Ae=set('PC'), enc_attr=set(), size=2, print_label='Test', select_multi_attr=True)
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -43,7 +43,7 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == eq
     # create a new node in order to test encryption
-    root = Node(operation='encryption', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2)
+    root = Node(operation='encryption', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, print_label='Test')
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -54,7 +54,7 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == set()
     # create a new node in order to test decryption
-    root = Node(operation='decryption', Ap=set(), Ae=set("N"), enc_attr=set(), size=2)
+    root = Node(operation='decryption', Ap=set(), Ae=set("N"), enc_attr=set(), size=2, print_label='Test')
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -65,7 +65,7 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == set()
     # create a new node in order to test re-encryption
-    root = Node(operation='re-encryption', Ap=set(), Ae=set("N"), enc_attr=set(), size=2)
+    root = Node(operation='re-encryption', Ap=set(), Ae=set("N"), enc_attr=set(), size=2, print_label='Test')
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -76,7 +76,7 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == set()
     # create a new node in order to test group-by
-    root = Node(operation='group-by', Ap=set("C"), Ae=set("NS"), enc_attr=set(), size=2, group_attr='C')
+    root = Node(operation='group-by', Ap=set("C"), Ae=set("NS"), enc_attr=set(), size=2, group_attr='C', print_label='Test')
     # Assign base relation to the node
     root.relation = r
     root.compute_profile()
@@ -87,9 +87,9 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == set()
     # create a new node with two children in order to test join
-    root = Node(operation='join', Ap=set("NS"), Ae=set(), enc_attr=set(), size=2)
-    Node(operation='projection', Ap=set('NP'), Ae=set(), enc_attr=set(), size=2, parent=root)
-    Node(operation='projection', Ap=set('SC'), Ae=set(), enc_attr=set(), size=2, parent=root)
+    root = Node(operation='join', Ap=set("NS"), Ae=set(), enc_attr=set(), size=2, print_label='Test')
+    Node(operation='projection', Ap=set('NP'), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
+    Node(operation='projection', Ap=set('SC'), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
     # Assign base relation to nodes
     root.relation = r
     root.children[0].relation = r
@@ -107,9 +107,9 @@ def test_compute_profile():
     assert root.ie == set()
     assert root.eq == eq
     # create a new node with two children in order to test cartesian product
-    root = Node(operation='cartesian', Ap=set('NPSC'), Ae=set(), enc_attr=set(), size=2)
-    Node(operation='projection', Ap=set('NP'), Ae=set(), enc_attr=set(), size=2, parent=root)
-    Node(operation='projection', Ap=set('SC'), Ae=set(), enc_attr=set(), size=2, parent=root)
+    root = Node(operation='cartesian', Ap=set('NPSC'), Ae=set(), enc_attr=set(), size=2, print_label='Test')
+    Node(operation='projection', Ap=set('NP'), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
+    Node(operation='projection', Ap=set('SC'), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
     # Assign base relation to nodes
     root.relation = r
     root.children[0].relation = r

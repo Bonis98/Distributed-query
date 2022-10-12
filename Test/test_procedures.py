@@ -9,7 +9,7 @@ from relation import Relation
 
 def test_compute_cost():
     # Create a tree with only one node
-    root = Node(operation='selection', Ap=set(), Ae=set(), enc_attr=set(), size=2)
+    root = Node(operation='selection', Ap=set(), Ae=set(), enc_attr=set(), size=2, print_label='Test')
     # Create two subjects with different computational price
     csv_data = io.StringIO('subject,comp_price\nU,1\nX,2')
     df = pd.read_csv(csv_data)
@@ -21,7 +21,7 @@ def test_compute_cost():
     assert node.comp_cost['U'] == df['comp_price'].values[0] * 3
     assert node.comp_cost['X'] == df['comp_price'].values[1] * 3
     # Add a child node
-    Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set(), size=2, parent=root)
+    Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
     compute_cost(root, subjects)
     # Check child
     node = root.children[0]
@@ -34,7 +34,7 @@ def test_compute_cost():
     assert node.comp_cost['U'] == df['comp_price'].values[0] * 3 + node.children[0].comp_cost['U']
     assert node.comp_cost['X'] == df['comp_price'].values[1] * 3 + node.children[0].comp_cost['X']
     # Add a second child node
-    Node(operation='join', Ap=set(), Ae=set(), enc_attr=set(), size=2, parent=root)
+    Node(operation='join', Ap=set(), Ae=set(), enc_attr=set(), size=2, print_label='Test', parent=root)
     compute_cost(root, subjects)
     # Check first child (projection)
     node = root.children[0]
@@ -61,7 +61,7 @@ def test_compute_cost():
 
 def test_is_authorized():
     # Create a tree with only one node
-    root = Node(operation='selection', Ap=set(), Ae=set(), enc_attr=set(), size=2)
+    root = Node(operation='selection', Ap=set(), Ae=set(), enc_attr=set(), print_label='Test', size=2)
     # Assign a profile
     root.vp = set('JI')
     root.ve = set('NSC')
@@ -93,10 +93,10 @@ def test_identify_candidates():
     # Create a base relation
     r = Relation(storage_provider='S', attributes='NPSD', enc_costs='1234', dec_costs='1234', size='1234')
     # Create a light query plan
-    root = Node(operation='join', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2)
+    root = Node(operation='join', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, print_label='Test')
     root.relation = r
-    Node(operation='projection', Ap=set(), Ae=set('NP'), enc_attr=set(), size=2, parent=root)
-    Node(operation='projection', Ap=set(), Ae=set('SD'), enc_attr=set(), size=2, parent=root)
+    Node(operation='projection', Ap=set(), Ae=set('NP'), enc_attr=set(), size=2, print_label='Test', parent=root)
+    Node(operation='projection', Ap=set(), Ae=set('SD'), enc_attr=set(), size=2, print_label='Test', parent=root)
     for child in root.children:
         child.relation = r
         child.compute_profile()
@@ -121,10 +121,10 @@ def test_compute_assignment():
     # Create a base relation
     r = Relation(storage_provider='S', attributes='NPSD', enc_costs='1234', dec_costs='1234', size='1234')
     # Create a light query plan
-    root = Node(operation='join', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2)
-    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, parent=root)
+    root = Node(operation='join', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, print_label='Test')
+    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, print_label='Test', parent=root)
     n.relation = r
-    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('SD'), size=2, parent=root)
+    n = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('SD'), size=2, print_label='Test', parent=root)
     n.relation = r
     # Compute profile of nodes
     for child in root.children:
@@ -149,7 +149,7 @@ def test_compute_assignment():
     assert root.children[0].children[0].assignee == r.storage_provider
     assert root.children[1].children[0].assignee == r.storage_provider
     # Create a tree with only one node to test insertion of re-encryption operations at leaves
-    root = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, parent=root)
+    root = Node(operation='projection', Ap=set(), Ae=set(), enc_attr=set('NP'), size=2, print_label='Test', parent=root)
     root.relation = r
     # Insert a re-encryption of an attribute pushed down
     to_enc_dec = set('N')
@@ -172,8 +172,8 @@ def test_extend_plan():
     # Create a base relation
     r = Relation(storage_provider='S', attributes='NPSD', enc_costs='1234', dec_costs='1234', size='1234')
     # Create a light query plan
-    root = Node(operation='selection', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2)
-    n = Node(operation='projection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, parent=root)
+    root = Node(operation='selection', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, print_label='Test')
+    n = Node(operation='projection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, print_label='Test', parent=root)
     # Assign relation to projection node
     n.relation = r
     # Compute profile of nodes
@@ -183,11 +183,11 @@ def test_extend_plan():
     root.assignee = 'X'
     n.assignee = 'Y'
     # Insert a new node as parent of selection to test encryption
-    root = Node(operation='selection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, children={root})
+    root = Node(operation='selection', Ap=set(), Ae=set('NS'), enc_attr=set(), size=2, print_label='Test', children={root})
     root.compute_profile()
     root.assignee = 'Z'
     # Inject node assigned to user U formulating the query
-    root = Node(operation='query', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, children={root})
+    root = Node(operation='query', Ap=set('NS'), Ae=set(), enc_attr=set(), size=2, print_label='Test', children={root})
     root.assignee = 'U'
     extend_plan(root, subjects, authorizations)
     # Test decryption for user U
