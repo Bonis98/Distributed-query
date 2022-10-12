@@ -13,9 +13,9 @@ class Ops:
         Ap = set(Ap)
         Ae = set(Ae)
         enc_attr = set(enc_attr)
-        if operation not in permitted_ops:
+        if operation.lower() not in permitted_ops:
             raise ValueError('Ops: operation must be one of %r.' % permitted_ops)
-        if operation == 'selection':
+        if operation.lower() == 'selection':
             self.select_multi_attr = select_multi_attr
         else:
             self.select_multi_attr = False
@@ -29,7 +29,7 @@ class Ops:
         self.Ap = Ap
         self.Ae = Ae
         self.enc_attr = enc_attr
-        self.operation = operation
+        self.operation = operation.lower()
 
     def get_op_cost(self):
         op_cost = {
