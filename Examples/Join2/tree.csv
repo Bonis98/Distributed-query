@@ -1,0 +1,7 @@
+ID,operation,Ap,Ae,enc_attr,size,print_label,group_attr,parent
+1,selection,PJ,,,2,Selection sum(P)>10%sum(J),,
+2,join,,NS,,4,Join N=S,,1
+3,projection,,,NP,2,Projection NP,,2
+4,join,SD,,,3,Join S=D,,2
+5,projection,,,SJ,5,Projection SJ,,4
+6,projection,,,D,7,Projection D,,4

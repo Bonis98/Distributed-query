@@ -1,0 +1,5 @@
+ID,operation,Ap,Ae,enc_attr,size,print_label,group_attr,parent
+1,selection,,,PC,4,Selection P>C,,
+2,group-by,,,NPC,2,"Group-by N,PC",N,1
+3,selection,,,P,3,Selection P=10,,2
+4,projection,,,NPC,7,Projection NPC,,3
