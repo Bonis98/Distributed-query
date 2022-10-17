@@ -71,14 +71,14 @@ def node_attr(node: Node):
         label += '</tr><tr>'
         label += '<td border="0" colspan="3">'
         # Print candidates
-        if not node.is_leaf:
+        if not node.is_leaf and len(node.candidates):
             label += 'Candidates:<B> '
             for cand in node.candidates:
                 label += cand
             label += '</B>'
         # Print a space in order to preserve row height
-        else:
-            label += ' '
+        elif node.is_leaf:
+            label += '&uarr;'
         label += '</td>'
         if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
             label += '<td>'
@@ -93,16 +93,26 @@ def node_attr(node: Node):
                 label += ' '
             label += '</td>'
         label += '</tr>'
-        label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td>'
+        if not node.is_leaf and node.assignee != '':
+            label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td>'
+        elif node.is_leaf:
+            label += '<tr><td border="0" colspan="3">' + node.relation.name + '('
+            for attr in node.relation.attributes:
+                label += attr
+            label += ')</td></tr>'
         if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
             # eq sets need to be printed with ; in order to separate them
+            if label.endswith('</tr>'):
+                label = label[:-5]
             label += '<td>'
             for collection in node.eq:
                 for attr in collection:
                     label += attr
                 label += ';'
-            label += '</td>'
-        label += '</tr></table>>'
+            label += '</td></tr>'
+        if node.is_leaf:
+            label += '<tr><td border="0" colspan="3">@' + node.relation.storage_provider.upper() + '</td></tr>'
+        label += '</table>>'
         label += 'shape=plain'
         if not node.eq:
             label += ' '
