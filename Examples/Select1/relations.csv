@@ -1,3 +1,3 @@
-provider,attributes,enc_costs,dec_costs,size,node_id
-F,NPC,123,456,789,3
-C,SJI,123,456,789,5
+name,provider,attributes,enc_costs,dec_costs,size,node_id
+Flight,F,NPC,463,456,789,3
+Company,C,SJI,734,257,257,5

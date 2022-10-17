@@ -2,7 +2,7 @@ subject,comp_price,transfer_price
 F,7,1
 C,2,4
 A,5,3
-U,7,2
+U,20,20
 L,7,3
 M,5,8
 N,2,2
@@ -10,5 +10,5 @@ O,6,2
 P,1,2
 Q,5,6
 R,8,2
-S,3,3
+S,3,1
 T,5,8
