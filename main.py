@@ -10,6 +10,7 @@ from node import Node
 
 
 def main(args):
+    # TODO:Candidates in re-encryption
     coloredlogs.install(
         level=args.loglevel, fmt='%(asctime)s [%(funcName)s] %(levelname)s %(message)s', datefmt='%H:%M:%S')
     print('Starting program...')
