@@ -96,10 +96,20 @@ def node_attr(node: Node):
         if not node.is_leaf and node.assignee != '':
             label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td>'
         elif node.is_leaf:
-            label += '<tr><td border="0" colspan="3">' + node.relation.name + '('
-            for attr in node.relation.attributes:
-                label += attr
-            label += ')</td></tr>'
+            label += '<tr><td border="0" colspan="2">' + node.relation.name + '('
+            for attr in node.relation.primary_key:
+                if attr in node.relation.plain_attr:
+                    label += attr
+                else:
+                    label += '<font color="firebrick">' + attr + '</font>'
+            for attr in node.relation.plain_attr:
+                if attr not in node.relation.primary_key:
+                    label += attr
+            label += '<font color="firebrick">'
+            for attr in node.relation.enc_attr:
+                if attr not in node.relation.primary_key:
+                    label += attr
+            label += '</font>)</td></tr>'
         if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
             # eq sets need to be printed with ; in order to separate them
             if label.endswith('</tr>'):

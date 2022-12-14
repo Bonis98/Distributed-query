@@ -49,7 +49,8 @@ def read_relations(input_path, nodes: list):
     df = df.astype({'node_id': int})
     for idx, row in df.iterrows():
         relation = Relation(
-            name=row['name'], storage_provider=row['provider'], attributes=row['attributes'],
+            name=row['name'], storage_provider=row['provider'], primary_key=row['primary_key'],
+            plain_attr=row['plain_attr'], enc_attr=row['enc_attr'],
             enc_costs=row['enc_costs'], dec_costs=row['dec_costs'], size=row['size'])
         relations.append(relation)
         nodes[row['node_id'] - 1].relation = relation
