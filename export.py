@@ -96,7 +96,7 @@ def node_attr(node: Node):
         if not node.is_leaf and node.assignee != '':
             label += '<tr><td border="0" colspan="3">Assignee:<B> ' + node.assignee + '</B></td>'
         elif node.is_leaf:
-            label += '<tr><td border="0" colspan="2">' + node.relation.name + '('
+            label += '<tr><td border="0" colspan="3">' + node.relation.name + '('
             for attr in node.relation.primary_key:
                 if attr in node.relation.plain_attr:
                     label += attr
