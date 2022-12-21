@@ -22,19 +22,19 @@ def read_tree(input_path):
     df['parent'] = df['parent'].fillna(value=0)
     df = df.fillna(value='')
     df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})
-    df = df.astype({'Ap': 'str', 'Ae': 'str', 'enc_attr': 'str'})
+    df = df.astype({'Ap': 'str', 'Ae': 'str', 'As': 'str'})
     for idx, row in df.iterrows():
         multi_attr = False
         if row['operation'] == 'selection':
-            if len(row['Ap']) > 1 or len(row['Ae']) > 1 or len(row['enc_attr']) > 1:
+            if len(row['Ap']) > 1 or len(row['Ae']) > 1 or len(row['As']) > 1:
                 multi_attr = True
         if not idx:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], enc_attr=row['enc_attr'], size=row['size'],
+                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'], size=row['size'],
                 print_label=row['print_label'], group_attr=row['group_attr'], select_multi_attr=multi_attr)
         else:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], enc_attr=row['enc_attr'],
+                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'],
                 size=row['size'], print_label=row['print_label'], group_attr=row['group_attr'],
                 select_multi_attr=multi_attr, parent=nodes[row['parent'] - 1])
         nodes.append(node)
@@ -45,6 +45,7 @@ def read_relations(input_path, nodes: list):
     logging.debug('Reading relations...')
     relations = list()
     df = pd.read_csv(input_path + 'relations.csv')
+    df = df.fillna(value='')
     df = df.astype('str')
     df = df.astype({'node_id': int})
     for idx, row in df.iterrows():

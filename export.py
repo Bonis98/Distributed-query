@@ -110,6 +110,8 @@ def node_attr(node: Node):
                 if attr not in node.relation.primary_key:
                     label += attr
             label += '</font>)</td></tr>'
+            if '<font color="firebrick"></font>' in label:
+                label = label.replace('<font color="firebrick"></font>', '')
         if len(node.vp) or len(node.ve) or len(node.vE) or len(node.ip) or len(node.ie) or len(node.eq):
             # eq sets need to be printed with ; in order to separate them
             if label.endswith('</tr>'):

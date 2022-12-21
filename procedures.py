@@ -50,18 +50,29 @@ def identify_candidates(root: Node, subjects: dict, authorizations: dict):
                         if candidate not in cand:
                             cand.append(candidate)
             for subject in cand:
-                # Authorized for current node
                 if __is_authorized(authorizations[subject], node=node):
-                    # Authorized for first child of current node
-                    if __is_authorized(authorizations[subject], node=node.children[0]):
-                        # If node has two children verify if it is authorized for the second
-                        if len(node.children) == 2:
-                            # Authorized for second child (if present)
-                            if __is_authorized(authorizations[subject], node=node.children[1]):
-                                node.candidates.append(subject)
-                        # If node has one child, then subject is authorized
-                        else:
-                            node.candidates.append(subject)
+                    node.candidates.append(subject)
+                # Try to encrypt attributes to increase candidates
+                # elif not node.cryptographic:
+                #     # enc = node.vp.intersection(authorizations[subject]['enc']).difference(node.Ap)
+                #     enc = node.vp.intersection(authorizations[subject]['enc'])
+                #     if len(enc):
+                #         path = None
+                #         for child in node.children:
+                #             for leaf in child.leaves:
+                #                 if enc.issubset(leaf.attributes):
+                #                     path = child
+                #         n = Node(
+                #             operation='encryption', Ap=enc, Ae=set(), As=set(),
+                #             print_label='Encrypt ' + str(enc), cryptographic=True, parent=node, children={path})
+                #         n.compute_profile()
+                #         node.compute_profile()
+                #         if __is_authorized(authorizations[subject], node=node):
+                #             node.candidates.append(subject)
+                #         for child in n.children:
+                #             child.parent = n.parent
+                #         n.parent = None
+                #         node.compute_profile()
             logging.debug('Final candidate(s) for %s: %s', node.name, node.candidates)
             # If node has no candidates, print error and stop the computation
             if len(node.candidates) == 0:
@@ -81,17 +92,17 @@ def compute_assignment(
             # Assign node to the storage provider
             node.assignee = node.relation.storage_provider
             # Base relation of the node contains attributes to be re-encrypted
-            if len(to_enc_dec.intersection(set(node.relation.attributes))):
-                att = to_enc_dec.intersection(set(node.relation.attributes))
+            if len(to_enc_dec.intersection(set(node.relation.enc_attr))):
+                att = to_enc_dec.intersection(set(node.relation.enc_attr))
                 for cand in subjects.keys():
                     # Candidates are already sorted by comp+transfer price
                     dec = att.intersection(set(authorizations[cand]['plain']))
-                    if len(dec) and set(node.relation.attributes) \
+                    if len(dec) and set(node.relation.enc_attr) \
                             .issubset(set(authorizations[cand]['plain']).union(set(authorizations[cand]['enc']))):
                         # Insert re-encryption node for 'dec' as parent of current node
                         logging.debug('Inserting a re-encryption node for attribute(s) %s', dec)
                         n = Node(
-                            operation='re-encryption', Ap=set(), Ae=dec, enc_attr=set(), cryptographic=True,
+                            operation='re-encryption', Ap=set(), Ae=dec, As=set(), cryptographic=True,
                             print_label='Re-encrypt ' + str(dec), parent=node.parent, children={node})
                         n.assignee = cand
                         # This line in the paper was one indentation back
@@ -109,19 +120,19 @@ def compute_assignment(
                 cost += node.comp_cost[cand]  # Calculate computational cost
                 for attr in node.totAp.union(node.totAe).intersection(set(authorizations[cand]['plain'])):
                     for rel in relations:  # S decrypts the attribute
-                        if attr in rel.attributes:
-                            cost += int(rel.dec_costs[rel.attributes.index(attr)]) * subjects[cand]['comp_price']
+                        if attr in rel.enc_attr:
+                            cost += int(rel.dec_costs[rel.enc_attr.index(attr)]) * subjects[cand]['comp_price']
                 for attr in node.totAe.difference(set(authorizations[cand]['plain'])):
                     for rel in relations:  # Need to delegate re-encryption of attribute
-                        if attr in rel.attributes:
-                            index = rel.attributes.index(attr)
+                        if attr in rel.enc_attr:
+                            index = rel.enc_attr.index(attr)
                             cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
                                     * avg_comp_price + int(rel.size[index]) \
                                     * (avg_transfer_price + int(subjects[cand]['transfer_price']))
                 for attr in to_enc_dec.intersection(authorizations[cand]['plain']):  # S can re-encrypt attribute
                     for rel in relations:
-                        if attr in rel.attributes:
-                            index = rel.attributes.index(attr)
+                        if attr in rel.enc_attr:
+                            index = rel.enc_attr.index(attr)
                             cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
                                     * subjects[cand]['comp_price']
                 if cost < min_cost:
@@ -136,7 +147,7 @@ def compute_assignment(
                 Ae = to_enc_dec.intersection(set(authorizations[node.assignee]['plain']))
                 logging.debug('Inserting a re-encryption node for attribute(s) %s', Ae)
                 n = Node(
-                    operation='re-encryption', Ap=set(), Ae=Ae, enc_attr=set(), cryptographic=True,
+                    operation='re-encryption', Ap=set(), Ae=Ae, As=set(), cryptographic=True,
                     print_label='Re-encrypt ' + str(Ae), parent=node.parent, children={node})
                 n.assignee = node.assignee
                 to_enc_dec = to_enc_dec.difference(set(authorizations[node.assignee]['plain']))
@@ -150,7 +161,7 @@ def compute_assignment(
                     enc = re_enc.intersection(child.Ap)
                     re_enc = re_enc.difference(child.Ap)
                     for leaf in child.leaves:
-                        path_attr = leaf.Ae.union(leaf.enc_attr).intersection(re_enc)
+                        path_attr = leaf.Ae.union(leaf.As).intersection(re_enc)
                         for descendant in node.descendants:
                             path_attr = path_attr.difference(descendant.Ae)
                             if not len(path_attr):
@@ -158,18 +169,16 @@ def compute_assignment(
                         if len(path_attr):
                             logging.debug('Inserting a re-encryption node for attribute(s) %s', path_attr)
                             child = Node(
-                                operation='re-encryption', Ap=set(), Ae=path_attr, enc_attr=set(), cryptographic=True,
+                                operation='re-encryption', Ap=set(), Ae=path_attr, As=set(), cryptographic=True,
                                 print_label='Re-encrypt ' + str(path_attr), parent=node, children={child})
                             child.assignee = node.assignee
-                        path_attr = leaf.Ae.union(leaf.enc_attr).intersection(enc)
+                        path_attr = leaf.Ae.union(leaf.As).intersection(enc)
                         if len(path_attr):
                             logging.debug('Inserting an encryption node for attribute(s) %s', path_attr)
                             child = Node(
-                                operation='encryption', Ap=path_attr, Ae=set(), enc_attr=set(), cryptographic=True,
+                                operation='encryption', Ap=path_attr, Ae=set(), As=set(), cryptographic=True,
                                 print_label='Encrypt ' + str(path_attr), parent=node, children={child})
                             child.assignee = node.assignee
-                            # After inserting a cryptographic operation, recompute candidates
-                            identify_candidates(child.root, subjects, authorizations)
         logging.debug('Assignee for %s: %s', node.name, node.assignee)
 
 
@@ -184,43 +193,46 @@ def extend_plan(root: Node, subjects: dict, authorizations: dict):
             if len(decrypt):
                 logging.debug('Inserting a decryption node for attribute(s) %s assigned to U', decrypt)
                 n = Node(
-                    operation='decryption', Ap=set(), Ae=decrypt, enc_attr=set(),
+                    operation='decryption', Ap=set(), Ae=decrypt, As=set(),
                     print_label='Decrypt ' + str(decrypt), cryptographic=True, parent=node, children={node.children[0]})
                 n.assignee = 'U'
-        else:
+        elif len(node.children):
             for child in node.children:
                 dec = node.Ap.intersection(child.ve.union(child.vE)).difference(child.vp)
                 if len(dec):
                     logging.debug('Inserting a decryption node for attribute(s) %s', dec)
                     n = Node(
-                        operation='decryption', Ap=set(), Ae=dec, enc_attr=set(),
+                        operation='decryption', Ap=set(), Ae=dec, As=set(),
                         print_label='Decrypt ' + str(dec), cryptographic=True, parent=node, children={child})
-                    # After inserting a cryptographic operation, recompute candidates
-                    identify_candidates(n.root, subjects, authorizations)
+                    n.compute_profile()
                     n.assignee = node.assignee
-            node.compute_profile()
+        node.compute_profile()
+        if not node.is_root:
             enc = node.vp.intersection(authorizations[node.parent.assignee]['enc'])
             if len(enc):
                 logging.debug('Inserting an encryption node for attribute(s) %s', enc)
                 n = Node(
-                    operation='encryption', Ap=enc, Ae=set(), enc_attr=set(),
+                    operation='encryption', Ap=enc, Ae=set(), As=set(),
                     print_label='Encrypt ' + str(enc), cryptographic=True, parent=node.parent, children={node})
                 n.compute_profile()
-                # Candidates need to be re-identified after inserting an encryption operation
-                identify_candidates(n.root, subjects, authorizations)
                 n.assignee = node.assignee
 
 
 def __is_authorized(authorization, node: Node):
-    # Authorized for plaintext
-    if not node.vp.union(node.ip).issubset(set(authorization['plain'])):
-        return False
-    # Authorized for encrypted
-    if not node.ve.union(node.vE, node.ie).issubset(set(authorization['enc']).union(set(authorization['plain']))):
-        return False
-    # Uniform visibility
-    for eq in node.eq:
-        if not eq.issubset(set(authorization['plain'])):
-            if not eq.issubset(set(authorization['enc'])):
-                return False
+    nodes = list()
+    nodes.append(node)
+    for child in node.children:
+        nodes.append(child)
+    for node in nodes:
+        # Authorized for plaintext
+        if not node.vp.union(node.ip).issubset(set(authorization['plain'])):
+            return False
+        # Authorized for encrypted
+        if not node.ve.union(node.vE, node.ie).issubset(set(authorization['enc']).union(set(authorization['plain']))):
+            return False
+        # Uniform visibility
+        for eq in node.eq:
+            if not eq.issubset(set(authorization['plain'])):
+                if not eq.issubset(set(authorization['enc'])):
+                    return False
     return True

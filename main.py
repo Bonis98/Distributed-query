@@ -22,7 +22,7 @@ def main(args):
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
-    Node('query', Ap=set('CPI'), Ae=set(), enc_attr=set(), size=2, print_label='User formulating the query',
+    Node('query', Ap=set('CPI'), Ae=set(), As=set(), size=2, print_label='User formulating the query',
          children={root})
     root.parent.assignee = 'U'
     # Identify candidates for each node in the tree
