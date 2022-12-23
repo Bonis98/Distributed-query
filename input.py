@@ -21,8 +21,8 @@ def read_tree(input_path):
     df = pd.read_csv(input_path + 'tree.csv')
     df['parent'] = df['parent'].fillna(value=0)
     df = df.fillna(value='')
-    df = df.astype({'ID': 'int', 'size': 'int', 'parent': 'int'})
-    df = df.astype({'Ap': 'str', 'Ae': 'str', 'As': 'str'})
+    df = df.astype({'ID': 'int', 'parent': 'int'})
+    df = df.astype({'Ap': 'str', 'Ae': 'str', 'As': 'str', 'Ane': 'str'})
     for idx, row in df.iterrows():
         multi_attr = False
         if row['operation'] == 'selection':
@@ -30,12 +30,12 @@ def read_tree(input_path):
                 multi_attr = True
         if not idx:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'], size=row['size'],
+                operation=row['operation'], Ap=row['Ap'], Ane=row['Ane'], Ae=row['Ae'], As=row['As'],
                 print_label=row['print_label'], group_attr=row['group_attr'], select_multi_attr=multi_attr)
         else:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'],
-                size=row['size'], print_label=row['print_label'], group_attr=row['group_attr'],
+                operation=row['operation'], Ap=row['Ap'], Ane=row['Ane'], Ae=row['Ae'], As=row['As'],
+                print_label=row['print_label'], group_attr=row['group_attr'],
                 select_multi_attr=multi_attr, parent=nodes[row['parent'] - 1])
         nodes.append(node)
     return nodes
@@ -51,7 +51,7 @@ def read_relations(input_path, nodes: list):
     for idx, row in df.iterrows():
         relation = Relation(
             name=row['name'], storage_provider=row['provider'], primary_key=row['primary_key'],
-            plain_attr=row['plain_attr'], enc_attr=row['enc_attr'],
+            plain_attr=row['plain_attr'], enc_attr=row['enc_attr'], attr=row['attr'],
             enc_costs=row['enc_costs'], dec_costs=row['dec_costs'], size=row['size'])
         relations.append(relation)
         nodes[row['node_id'] - 1].relation = relation

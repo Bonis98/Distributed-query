@@ -2,11 +2,11 @@ subject,plain,enc
 F,,CNP
 U,CNP,
 L,,NP
-M,,CNP
+M,P,CN
 N,CNP,
-O,C,
+O,CN,
 P,CNP,
-Q,,CN
+Q,C,PN
 R,CP,
 S,CNP,
 T,P,

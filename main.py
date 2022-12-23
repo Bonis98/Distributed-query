@@ -2,6 +2,7 @@ import logging
 from argparse import ArgumentParser
 
 import coloredlogs as coloredlogs
+from anytree import PostOrderIter
 
 import export
 import procedures as p
@@ -9,11 +10,10 @@ from input import read_input
 from node import Node
 
 
-def main(args):
-    # TODO:Candidates in re-encryption
+def main():
     coloredlogs.install(
         level=args.loglevel, fmt='%(asctime)s [%(funcName)s] %(levelname)s %(message)s', datefmt='%H:%M:%S')
-    print('Starting program...')
+    logging.info('Starting program...')
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     manual_assignment = args.manual_assignment
     # Read input data for the algorithm
@@ -22,22 +22,24 @@ def main(args):
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
-    Node('query', Ap=set('CPI'), Ae=set(), As=set(), size=2, print_label='User formulating the query',
-         children={root})
+    Node('query', Ap=set('CPI'), print_label='User formulating the query', children={root})
     root.parent.assignee = 'U'
     # Identify candidates for each node in the tree
     p.identify_candidates(root, subjects, authorizations)
-    to_enc_dec = set()
+    # Compute size of every node
+    p.node_size(root, relations)
     # Assign nodes to subjects and insert re-encryption operations
     p.compute_assignment(
-        root, subjects, authorizations, to_enc_dec, relations, avg_comp_price, avg_transfer_price, manual_assignment)
+        root, subjects, authorizations, relations, avg_comp_price, avg_transfer_price, manual_assignment)
     # Inject encryption/decryption operation
-    p.extend_plan(root.root, subjects, authorizations)
-    # Export results in a PDF documents
+    p.extend_plan(root.root, authorizations)
+    for node in PostOrderIter(root):
+        node.compute_profile()
+    # Export results in a PDF document
     export.export_tree(args.path + 'Tree.pdf', root.root)
 
 
-if __name__ == '__main__':
+def parse_args():
     parser = ArgumentParser()
     parser.add_argument(
         "-p", "--path", dest="path", help="Path where to save exported PDFs plans", metavar="PATH", required=True)
@@ -53,5 +55,9 @@ if __name__ == '__main__':
     group.add_argument(
         '-d', '--debug', help="Print lots of debugging statements",
         action="store_const", dest="loglevel", const=logging.DEBUG)
-    args = parser.parse_args()
-    main(args)
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main()
