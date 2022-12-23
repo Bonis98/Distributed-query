@@ -26,7 +26,7 @@ def read_tree(input_path):
     for idx, row in df.iterrows():
         multi_attr = False
         if row['operation'] == 'selection':
-            if len(row['Ap']) > 1 or len(row['Ae']) > 1 or len(row['As']) > 1:
+            if (len(row['Ap']) + len(row['Ae']) + len(row['As'])) > 1:
                 multi_attr = True
         if not idx:
             node = Node(

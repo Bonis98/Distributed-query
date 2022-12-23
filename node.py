@@ -135,12 +135,6 @@ class Node(Ops, NodeMixin):
             self.ie = self.ie.union(self.ve.union(self.vE).intersection(self.attributes))
         elif self.operation == 'selection' and self.select_multi_attr:
             self.eq.add(frozenset(self.attributes))
-            # if len(self.Ap):
-            #     self.eq.add(frozenset(self.Ap))
-            # if len(self.Ae):
-            #     self.eq.add(frozenset(self.Ae))
-            # if len(self.As):
-            #     self.eq.add(frozenset(self.As))
         elif self.operation == 'cartesian':
             # Union of sets of children, already done by __assign_profile
             pass

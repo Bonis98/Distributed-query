@@ -1,4 +1,4 @@
-ID,operation,Ap,Ae,As,size,print_label,group_attr,parent
-1,join,NS,,,4,Join N=S,,
-2,projection,,,N,3,Projection N,,1
-3,projection,,,SJ,7,Projection SJ,,1
+ID,operation,Ap,Ae,As,Ane,size,print_label,group_attr,parent
+1,join,NS,,,NS,4,Join N=S,,
+2,projection,,,N,,3,Projection N,,1
+3,projection,,,SJ,,7,Projection SJ,,1
