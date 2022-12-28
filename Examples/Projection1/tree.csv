@@ -1,4 +1,4 @@
 ID,operation,Ap,Ae,As,size,print_label,group_attr,parent
 1,projection,N,,,4,Projection N,,
-2,projection,,NP,,2,Projection NP,,1
+2,projection,,P,N,2,Projection NP,,1
 3,projection,,,NPC,3,Projection NPC,,2

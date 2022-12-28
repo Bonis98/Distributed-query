@@ -1,5 +1,5 @@
-ID,operation,Ap,Ae,As,Ane,size,print_label,group_attr,parent
-1,selection,P,,,P,2,Selection P>20,,
-2,cartesian,,,NS,,4,Cartesian,,1
-3,projection,P,,N,,3,Projection NP,,2
-4,projection,J,,S,,7,Projection SJ,,2
+ID,operation,Ap,Ae,As,print_label,group_attr,parent
+1,selection,P,,,Selection P>20,,
+2,cartesian,,,NS,Cartesian,,1
+3,projection,,,NP,Projection NP,,2
+4,projection,,,SJ,Projection SJ,,2

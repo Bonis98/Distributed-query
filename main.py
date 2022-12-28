@@ -17,7 +17,7 @@ def main():
     # Manual assignment of assignee (used to simulate same execution contained in the paper)
     manual_assignment = args.manual_assignment
     # Read input data for the algorithm
-    root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price = read_input(args.input)
+    root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price, global_Ap = read_input(args.input)
     export.export_tree(args.path + 'Plan.pdf', root)
     # Compute cost of any node assigned to any subject
     p.compute_cost(root, subjects)
@@ -25,12 +25,14 @@ def main():
     Node('query', Ap=set('CPI'), print_label='User formulating the query', children={root})
     root.parent.assignee = 'U'
     # Identify candidates for each node in the tree
-    p.identify_candidates(root, subjects, authorizations)
+    p.identify_candidates(root, subjects, authorizations, global_Ap)
     # Compute size of every node
     p.node_size(root, relations)
     # Assign nodes to subjects and insert re-encryption operations
     p.compute_assignment(
         root, subjects, authorizations, relations, avg_comp_price, avg_transfer_price, manual_assignment)
+    # Insert encryption to made authorized assignees
+    p.insert_encryption(authorizations, relations, root, subjects)
     # Inject encryption/decryption operation
     p.extend_plan(root.root, authorizations)
     for node in PostOrderIter(root):

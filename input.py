@@ -8,37 +8,39 @@ from relation import Relation
 
 def read_input(input_path):
     logging.info("Reading data from input files...")
-    nodes = read_tree(input_path)
+    nodes, global_Ap = read_tree(input_path)
     relations = read_relations(input_path, nodes)
     subjects, avg_comp_price, avg_transfer_price = read_subjects(input_path)
     authorizations = read_authorizations(input_path)
-    return nodes[0], relations, subjects, authorizations, avg_comp_price, avg_transfer_price
+    return nodes[0], relations, subjects, authorizations, avg_comp_price, avg_transfer_price, global_Ap
 
 
 def read_tree(input_path):
     logging.debug('Reading tree structure...')
+    global_Ap = set()
     nodes = list()
     df = pd.read_csv(input_path + 'tree.csv')
     df['parent'] = df['parent'].fillna(value=0)
     df = df.fillna(value='')
     df = df.astype({'ID': 'int', 'parent': 'int'})
-    df = df.astype({'Ap': 'str', 'Ae': 'str', 'As': 'str', 'Ane': 'str'})
+    df = df.astype({'Ap': 'str', 'Ae': 'str', 'As': 'str'})
     for idx, row in df.iterrows():
+        global_Ap = global_Ap.union(set(row['Ap']))
         multi_attr = False
         if row['operation'] == 'selection':
             if (len(row['Ap']) + len(row['Ae']) + len(row['As'])) > 1:
                 multi_attr = True
         if not idx:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ane=row['Ane'], Ae=row['Ae'], As=row['As'],
+                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'],
                 print_label=row['print_label'], group_attr=row['group_attr'], select_multi_attr=multi_attr)
         else:
             node = Node(
-                operation=row['operation'], Ap=row['Ap'], Ane=row['Ane'], Ae=row['Ae'], As=row['As'],
+                operation=row['operation'], Ap=row['Ap'], Ae=row['Ae'], As=row['As'],
                 print_label=row['print_label'], group_attr=row['group_attr'],
                 select_multi_attr=multi_attr, parent=nodes[row['parent'] - 1])
         nodes.append(node)
-    return nodes
+    return nodes, global_Ap
 
 
 def read_relations(input_path, nodes: list):

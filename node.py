@@ -5,7 +5,7 @@ from anytree import NodeMixin
 
 # Class representing an operation to be inserted in the tree plan
 class Ops:
-    def __init__(self, operation, Ap: set, Ane: set, Ae: set, As: set, group_attr, select_multi_attr):
+    def __init__(self, operation, Ap: set, Ae: set, As: set, group_attr, select_multi_attr):
         # Value restriction for operation attribute
         permitted_ops = [
             'projection', 'selection', 'cartesian', 'join',
@@ -13,7 +13,6 @@ class Ops:
         Ap = set(Ap)
         Ae = set(Ae)
         As = set(As)
-        Ane = set(Ane)
         if operation.lower() not in permitted_ops:
             raise ValueError('Ops: operation must be one of %r.' % permitted_ops)
         if operation.lower() == 'selection':
@@ -22,17 +21,10 @@ class Ops:
             self.select_multi_attr = False
         if len(Ap.intersection(Ae, As)):
             raise ValueError('Ops: plain, re_enc and enc sets must be disjoint')
-        if not Ane.issubset(Ap):
-            raise ValueError('Ops: Ane must be a subset of Ap')
-        if group_attr is not None:
-            if not (Ap.union(Ae, As)).issuperset(group_attr):
-                raise ValueError('Ops: group_attr must be a valid attribute')
-            else:
-                self.group_attr = group_attr
+        self.group_attr = group_attr
         self.Ap = Ap
         self.Ae = Ae
         self.As = As
-        self.Ane = Ane
         self.operation = operation.lower()
 
     def get_op_cost(self):
@@ -69,16 +61,14 @@ class Node(Ops, NodeMixin):
 
     def __init__(
             self, operation, cryptographic=False, print_label=None, group_attr=None, select_multi_attr=False,
-            parent=None, children=None, Ane=None, Ap=None, Ae=None, As=None):
+            parent=None, children=None, Ap=None, Ae=None, As=None):
         if As is None:
             As = set()
         if Ae is None:
             Ae = set()
         if Ap is None:
             Ap = set()
-        if Ane is None:
-            Ane = set()
-        super().__init__(operation, Ap, Ane, Ae, As, group_attr, select_multi_attr)
+        super().__init__(operation, Ap, Ae, As, group_attr, select_multi_attr)
         self.parent = parent
         self.cryptographic = cryptographic
         self.size = 0
@@ -88,6 +78,8 @@ class Node(Ops, NodeMixin):
         if children:
             self.children = children
         self.attributes = set(Ap).union(set(Ae)).union(set(As))
+        if group_attr:
+            self.attributes = self.attributes.union(set(group_attr))
 
     # Computes the profile of a node (according to def 2.2)
     def compute_profile(self):
@@ -116,15 +108,14 @@ class Node(Ops, NodeMixin):
                 self.ie = self.ie.union(child.ie)
                 self.eq = self.eq.union(child.eq)
         # If an attribute has to be evaluated in plain, add it to vp
-        if len(self.Ane) and not self.cryptographic:
-            self.vp = self.vp.union(self.Ane)
-            self.ve = self.ve.difference(self.Ane)
-            self.vE = self.vE.difference(self.Ane)
+        if len(self.Ap) and not self.cryptographic:
+            self.vp = self.vp.union(self.Ap)
+            self.ve = self.ve.difference(self.Ap)
+            self.vE = self.vE.difference(self.Ap)
         # If an attribute has to be evaluated re-encrypted, add it to ve
         if len(self.Ae) and not self.cryptographic:
-            self.vp = self.vp.difference(self.Ae.difference(self.Ap))
-            self.ve = self.ve.union(self.Ae.difference(self.Ap))
-            self.vE = self.vE.difference(self.Ae.difference(self.Ap))
+            self.ve = self.ve.union(self.Ae)
+            self.vE = self.vE.difference(self.Ae)
         # Start to calculate profiles
         if self.operation == 'projection':
             self.vp = self.vp.intersection(self.attributes)
