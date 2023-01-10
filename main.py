@@ -27,7 +27,7 @@ def main():
     # Identify candidates for each node in the tree
     p.identify_candidates(root, subjects, authorizations, global_Ap)
     # Compute size of every node
-    p.node_size(root, relations)
+    p.comp_size(root, relations)
     # Assign nodes to subjects and insert re-encryption operations
     p.compute_assignment(
         root, subjects, authorizations, relations, avg_comp_price, avg_transfer_price, manual_assignment)

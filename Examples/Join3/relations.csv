@@ -1,5 +1,5 @@
 name,primary_key,provider,plain_attr,enc_attr,attr,enc_costs,dec_costs,size,node_id
-Insurance,H,K,G,HE,HEG,264,854,935,4
-Flight,N,F,PC,N,NPC,463,456,789,5
-Company,S,C,S,JI,SJI,734,257,257,6
-Customer,D,A,DF,B,DFB,914,138,264,7
+Insurance,H,K,G,HE,HEG,2;6;4,8;5;4,9;3;5,4
+Flight,N,F,PC,N,NPC,4;6;3,4;5;6,7;8;9,5
+Company,S,C,S,JI,SJI,7;3;4,2;5;7,2;5;7,6
+Customer,D,A,DF,B,DFB,9;1;4,1;3;8,2;6;4,7

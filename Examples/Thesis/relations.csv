@@ -1,0 +1,3 @@
+name,primary_key,provider,plain_attr,enc_attr,attr,enc_costs,dec_costs,size,node_id
+Impiegato,C,B,I,CS,CIS,9;1;4,1;3;8,2;6;4,5
+Veicolo,T,A,MV,TP,TPMV,4;6;3;6,1;6;4;8,2;6;7;4,6

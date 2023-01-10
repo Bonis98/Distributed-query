@@ -110,6 +110,7 @@ class Node(Ops, NodeMixin):
         # If an attribute has to be evaluated in plain, add it to vp
         if len(self.Ap) and not self.cryptographic:
             self.vp = self.vp.union(self.Ap)
+            # TODO: forse si può rimuovere linea
             self.ve = self.ve.difference(self.Ap)
             self.vE = self.vE.difference(self.Ap)
         # If an attribute has to be evaluated re-encrypted, add it to ve

@@ -114,7 +114,10 @@ def compute_assignment(
                             cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
                                     * avg_comp_price + int(rel.size[index]) \
                                     * (avg_transfer_price + int(subjects[cand]['transfer_price']))
-                for attr in node.ve.intersection(set(authorizations[cand]['enc'])):
+                enc = node.ve
+                for child in node.children:
+                    enc = enc.union(child.ve)
+                for attr in enc.intersection(set(authorizations[cand]['enc'])):
                     for rel in relations:  # Need to delegate encryption of attribute
                         if attr in rel.plain_attr:
                             index = rel.attr.index(attr)
@@ -233,7 +236,7 @@ def extend_plan(root: Node, authorizations: dict):
                 new_node.assignee = node.assignee
 
 
-def node_size(root: Node, relations: list):
+def comp_size(root: Node, relations: list):
     logging.info("Computing size of nodes...")
     for node in PostOrderIter(root):
         logging.debug("Computing size of node %s", node.name)
