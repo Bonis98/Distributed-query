@@ -30,10 +30,10 @@ def node_attr(node: Node):
         label += '>'
         # Re-encryption is half greyed out
         if node.operation == 're-encryption':
-            label += 'style=filled, fillcolor=\"white;0.5:lightgrey\", gradientangle=90'
+            label += 'style=filled, fillcolor=\"white;0.5:#00AEEF\", gradientangle=90'
         # Encryption is totally greyed out
         elif node.operation == 'encryption':
-            label += 'style=filled, fillcolor=\"lightgrey\"'
+            label += 'style=filled, fillcolor=\"#00AEEF\"'
     elif node.operation == 'query':
         label = 'label=<User formulating the query>, shape=box'
     # All the other nodes goes in a normal circle, with candidates and assignee in bold
@@ -57,12 +57,12 @@ def node_attr(node: Node):
             # If there are no attributes print a space
             if not node.vp:
                 label += ' '
-            label += '</td><td bgcolor="lightgrey">'
+            label += '</td><td bgcolor="#00AEEF">'
             for attr in node.ve:
                 label += attr
             if not node.ve:
                 label += ' '
-            label += '</td><td bgcolor="lightgrey">'
+            label += '</td><td bgcolor="#00AEEF">'
             for attr in node.vE:
                 label += attr
             if not node.vE:
@@ -86,7 +86,7 @@ def node_attr(node: Node):
                 label += attr
             if not node.ip:
                 label += ' '
-            label += '</td><td bgcolor="lightgrey">'
+            label += '</td><td bgcolor="#00AEEF">'
             for attr in node.ie:
                 label += attr
             if not node.ie:

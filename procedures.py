@@ -14,7 +14,7 @@ def compute_cost(root, subjects: dict):
         logging.debug('Processing costs on node %s', node.name)
         for subject in subjects:
             # Node cost
-            node.comp_cost[subject] = (subjects[subject]['comp_price'] * node.get_op_cost())
+            node.comp_cost[subject] = (subjects[subject]['comp_price'] * node.size)
             # Children costs
             for child in node.children:
                 node.comp_cost[subject] = node.comp_cost[subject] + child.comp_cost[subject]
@@ -114,16 +114,15 @@ def compute_assignment(
                             cost += (int(rel.dec_costs[index]) + int(rel.enc_costs[index])) \
                                     * avg_comp_price + int(rel.size[index]) \
                                     * (avg_transfer_price + int(subjects[cand]['transfer_price']))
-                enc = node.ve
+                enc = node.ve.union(node.ie)
                 for child in node.children:
-                    enc = enc.union(child.ve)
+                    enc = enc.union(child.ve).union(node.ie)
                 for attr in enc.intersection(set(authorizations[cand]['enc'])):
                     for rel in relations:  # Need to delegate encryption of attribute
                         if attr in rel.plain_attr:
                             index = rel.attr.index(attr)
                             cost += int(rel.enc_costs[index]) \
-                                    * avg_comp_price + int(rel.size[index]) \
-                                    * (avg_transfer_price + int(subjects[cand]['transfer_price']))
+                                    * subjects[rel.storage_provider]['comp_price']
                             # Decryption cost of attributes performed by User to see query result
                             cost += int(rel.dec_costs[rel.attr.index(attr)]) * subjects['U']['comp_price']
                 for attr in to_enc_dec.intersection(authorizations[cand]['plain']):  # S can re-encrypt attribute
@@ -179,24 +178,21 @@ def insert_encryption(authorizations, relations, root, subjects):
     # Insert and push down encryption
     for node in PostOrderIter(root, filter_=lambda n: not n.is_leaf and not n.cryptographic):
         for rel in relations:
-            attr = set(node.ve)
+            attr = set(node.ve).union(node.ie)
             for child in node.children:
-                attr = attr.union(child.ve)
+                attr = attr.union(child.ve).union(child.ie)
             attr = attr.intersection(rel.plain_attr)
             encrypt = set(authorizations[node.assignee]['enc']).intersection(attr).difference(encrypted)
             for attr in encrypt:
-                # Insert decryption
+                # Insert encryption
                 for leaf in node.leaves:
                     if attr in leaf.attributes:
-                        for cand in subjects.keys():
-                            if __is_authorized(authorizations[cand], leaf):
-                                new_node = Node(
-                                    operation='encryption', Ap=attr,
-                                    print_label='Encrypt ' + str(attr), cryptographic=True, parent=leaf.parent,
-                                    children={leaf})
-                                new_node.assignee = cand
-                                encrypted = encrypted.union(encrypt)
-                                break
+                        new_node = Node(
+                            operation='encryption', Ap=attr,
+                            print_label='Encrypt ' + str(attr), cryptographic=True, parent=leaf.parent,
+                            children={leaf})
+                        new_node.assignee = leaf.assignee
+                        encrypted = encrypted.union(encrypt)
     # Recompute profile of nodes after inserting encryption
     for node in PostOrderIter(root):
         node.compute_profile()

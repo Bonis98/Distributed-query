@@ -19,8 +19,6 @@ def main():
     # Read input data for the algorithm
     root, relations, subjects, authorizations, avg_comp_price, avg_transfer_price, global_Ap = read_input(args.input)
     export.export_tree(args.path + 'Plan.pdf', root)
-    # Compute cost of any node assigned to any subject
-    p.compute_cost(root, subjects)
     # Insert a node as parent of root assigned to the user formulating the query
     Node('query', Ap=set('CPI'), print_label='User formulating the query', children={root})
     root.parent.assignee = 'U'
@@ -28,6 +26,8 @@ def main():
     p.identify_candidates(root, subjects, authorizations, global_Ap)
     # Compute size of every node
     p.comp_size(root, relations)
+    # Compute cost of any node assigned to any subject
+    p.compute_cost(root, subjects)
     # Assign nodes to subjects and insert re-encryption operations
     p.compute_assignment(
         root, subjects, authorizations, relations, avg_comp_price, avg_transfer_price, manual_assignment)

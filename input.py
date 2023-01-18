@@ -65,13 +65,14 @@ def read_subjects(input_path):
     df = pd.read_csv(input_path + 'subjects.csv')
     if df.isnull().values.any():
         raise ValueError("Input: Subjects dataframe can't contain NaN values")
+    df = df.set_index('subject')
     df['sum'] = df['comp_price'] + df['transfer_price']
     df = df.sort_values(by=['sum'])
     df = df.drop(columns=['sum'])
-    subjects = df.set_index('subject').T.to_dict('dict')
-    avg_comp_price = df['comp_price'].mean()
-    avg_transfer_price = df['transfer_price'].mean()
-    return subjects, avg_comp_price, avg_transfer_price
+    subjects = df.T.to_dict('dict')
+    avg_comp_price = df['comp_price'].median()
+    avg_transfer_price = df['transfer_price'].median()
+    return subjects, int(avg_comp_price), int(avg_transfer_price)
 
 
 def read_authorizations(input_path):
