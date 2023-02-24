@@ -1,2 +1,2 @@
-name,provider,attributes,enc_costs,dec_costs,size,node_id
-Flight,F,NPC,463,456,789,4
+name,primary_key,provider,plain_attr,enc_attr,attr,enc_costs,dec_costs,size,node_id
+Flight,N,F,NC,P,NPC,4;6;3,4;5;6,1;2;3,4

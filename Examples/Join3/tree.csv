@@ -1,8 +1,8 @@
-ID,operation,Ap,Ae,enc_attr,size,print_label,group_attr,parent
-1,join,,NS,,7,Join N=S,,
-2,join,NH,,,9,Join N>H,,1
-3,join,,SD,,4,Join S=D,,1
-4,projection,,,HEG,2,Projection HEG,,2
-5,projection,,,NPC,3,Projection NPC,,2
-6,projection,,,SJI,5,Projection SJI,,3
-7,projection,,,DFB,7,Projection DFB,,3
+ID,operation,Ap,Ae,As,print_label,group_attr,parent
+1,join,SN,,,Join N=S,,
+2,join,,NH,,Join N=H,,1
+3,join,,,SD,Join S=D,,1
+4,projection,,,HEG,Projection HEG,,2
+5,projection,P,,NC,Projection NPC,,2
+6,projection,,,JIS,Projection SJI,,3
+7,projection,,,DFB,Projection DFB,,3

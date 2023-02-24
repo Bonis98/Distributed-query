@@ -1,9 +1,9 @@
-ID,operation,Ap,Ae,enc_attr,size,print_label,group_attr,parent
-1,selection,PJ,,,2,Selection sum(P)>10%avg(J),,
-2,Group-by,,D,FPJ,3,"Group-by D,sum(F),sum(P),avg(J)",D,1
-3,join,,NS,,4,Join N=S,,2
-4,selection,,,C,6,Selection C=10,,3
-5,projection,,,NPC,2,Projection NPC,,4
-6,cartesian,,,,3,Cartesian,,3
-7,projection,,,SJ,5,Projection SJ,,6
-8,projection,,,DF,7,Projection DF,,6
+ID,operation,Ap,Ae,As,print_label,group_attr,parent
+1,selection,,,PJ,Selection sum(P)>10%avg(J),,
+2,Group-by,F,D,PJ,"Group-by D,sum(F),sum(P),avg(J)",D,1
+3,join,NS,,,Join N=S,,2
+4,selection,,,C,Selection C=10,,3
+5,projection,,,NPC,Projection NPC,,4
+6,cartesian,,,,Cartesian,,3
+7,projection,,,SJ,Projection SJ,,6
+8,projection,,,DF,Projection DF,,6

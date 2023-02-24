@@ -1,4 +1,4 @@
-name,provider,attributes,enc_costs,dec_costs,size,node_id
-Flight,F,NPC,463,456,789,3
-Company,C,SJI,734,257,257,5
-Customer,A,DFB,914,138,264,6
+name,primary_key,provider,plain_attr,enc_attr,attr,enc_costs,dec_costs,size,node_id
+Flight,N,F,PC,N,NPC,4;6;3,4;5;6,7;8;9,3
+Company,S,C,S,JI,SJI,7;3;4,2;5;7,2;5;7,5
+Customer,D,A,DF,B,DFB,9;1;4,1;3;8,2;6;4,6
