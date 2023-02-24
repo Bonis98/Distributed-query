@@ -1,6 +1,6 @@
 
 # Assignment
-This is a project made for the master's thesis in my cybersecurity degree. The project consists in the implementation of the algorithm proposed in **Distributed Query Execution under Access Restrictions**
+This is a project made for the master's thesis in my cybersecurity degree. The project consists in the implementation of a variant of the algorithm proposed in [Distributed Query Execution under Access Restrictions](https://spdp.di.unimi.it/papers/dfjlps-dbsec2021.pdf)
 
 <a id='install'></a>
 # Installation and run
@@ -11,7 +11,7 @@ This is a project made for the master's thesis in my cybersecurity degree. The p
     - If you don't have pip installed, you can find informations [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-pip)
 5. The script has five command line arguments:
     - -p PATH, --path PATH: representing the path where to save the pdf containing the tree resulting from the computation (e.g. '../' to save the pdf in the directory containing the script folder)
-    - -m ASSIGNMENT, --manual ASSIGNMENT: Manually assign node to candidate, in the form 'XYZ' to assign them to nodes in pre-order
+    - -m ASSIGNMENT, --manual ASSIGNMENT: Manually assign node to candidate, in the form 'XYZ' to assign them to nodes in pre-order visit of the query tree plan
     - -i INPUT, --input INPUT: Path from where take the input of the algorithm
     - -v, --verbose: Enables verbose logging
     - -d, --debug: Enables debugging loggin
@@ -31,22 +31,27 @@ Folder [CSV_data](CSV_data) contains an example of that files
 <a id='relations'></a>
 ### relations.csv
 This is the file modeling the base relations of the query, structured as follows:
+- **name**: Name of the base relation
+- **primary_key**: Primary key of the relation
 - **provider**: Storage provider storing the relationship
-- **attributes**: Attributes of the relationship
-- **enc_costs**: list of encryption costs of attributes in the relationship
-- **dec_costs**: list of decryption costs of attributes in the relationship
-- **size**: list of attributes sizes (used to compute computational cost of node)
+- **plain_attr**: Attributes of the relationship stored in plain text
+- **enc_attr**: Attributes of the relationship stored encrypted
+- **attr**: All the attributes of the relationship (plain and enc)
+- **enc_costs**: list of (semi colon separated) encryption costs of attributes in the relationship
+- **dec_costs**: list of (semi colon separated) decryption costs of attributes in the relationship
+- **size**: list of (semi colon separated) attributes sizes (used to estimate computational cost of node)
 - **node_id**: id of the leaf node in the tree to which associate the base relation (see [nodes.csv](#nodescsv))
 
 Parsing of [relations.csv](CSV_data/relations.csv) produces the following two base relations:
-1. **relation 1**(NPC) assigned to storage provider **F**
-    - N has an encryption cost of 1, a decryption cost of 4 and a size of 7
-    - P has an encryption cost of 2, a decryption cost of 5 and a size of 8
-    - C has an encryption cost of 3, a decryption cost of 6 and a size of 9
-1. **relation 2**(SJI) assigned to storage provider **C**
-    - S has an encryption cost of 1, a decryption cost of 4 and a size of 7
-    - J has an encryption cost of 2, a decryption cost of 5 and a size of 8
-    - I has an encryption cost of 3, a decryption cost of 6 and a size of 9
+1. **relation flight**(<ins>N</ins>DPC) assigned to storage provider **F**
+    - N is stored encrypted, it has an encryption cost of 1, a decryption cost of 4 and a size of 7
+    - D is stored in plain text, it has an encryption cost of 2, a decryption cost of 5 and a size of 8
+    - P is stored in plain text, it has an encryption cost of 3, a decryption cost of 6 and a size of 9
+    - C is stored encrypted, it has an encryption cost of 4, a decryption cost of 7 and a size of 9
+1. **relation company**(<ins>S</ins>JI) assigned to storage provider **C**
+    - S is stored encrypted, it has an encryption cost of 1, a decryption cost of 4 and a size of 7
+    - J is stored in plain text, it has an encryption cost of 2, a decryption cost of 5 and a size of 8
+    - I is stored encrypted, it has an encryption cost of 3, a decryption cost of 6 and a size of 9
 
 <a id='nodes'></a>
 ### tree.csv
@@ -64,8 +69,7 @@ This is the file modeling the query tree plan, structured as follows:
   - Re-encryption
 - **Ap**: Set of attributes that need to be in plaintext to evaluate the operation associated with the node
 - **Ae**: Set of attributes that need to be re-encrypted to evaluate the operation associated with the node
-- **enc_attr**: Set of attributes encrypted in storage (default for base relations)
-- **size**: size of the node (used to compute computational cost of node)
+- **As**: Remaining set of attributes
 - **print_label**: label of the node to print when tree is exported 
 - **group_attr**: if the operation associated with the node is a *group-by*, this is the set of attributes on which the group-by clause is evaluated
 - **parent**: parent node of current node, used to build the tree
